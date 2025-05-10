@@ -1,0 +1,23 @@
+.input-text {
+  margin-top: 10px;
+  width: 80%;
+
+  .icon-default {
+    color: rgba(0, 0, 0, 0.54);
+  }
+  
+  .icon-error {
+    color: #f00;
+    justify-content: center;
+  }
+
+  .input-text-input {
+    width: 80%;
+  }
+
+  .input-text-custom-icon {
+    margin-right: 8px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+}
