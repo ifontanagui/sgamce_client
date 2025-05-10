@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+:root {
+  --off-white-color: #f9f9f9;
+  --soft-white-color: #ede4d7;
+  --soft-blue-color: #4174b3;
+  --dark-blue-color: #27548a;
+}
+
+.main {
+  height: 100vh;
+  overflow: scroll;
+}
+
+.flex {  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
