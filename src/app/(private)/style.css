@@ -32,6 +32,12 @@
       overflow-y: auto;
       overflow-x: hidden;
       height: 100%;
+
+      .menu-item-icon {
+        display: flex;
+        justify-content: center;
+        padding-right: 10px;
+      }
     }
   }
 
