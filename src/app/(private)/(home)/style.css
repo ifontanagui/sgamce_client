@@ -1,0 +1,7 @@
+.private-home {
+  height: 100%;
+  gap: 5px; 
+  font-size: large;
+
+  flex-direction: column;
+}
