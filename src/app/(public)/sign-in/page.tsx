@@ -28,6 +28,7 @@ export default function Login() {
 
     setLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 5000));
+    //add Cookies
     router.push("/");
   };
 
