@@ -3,9 +3,8 @@
 import React from "react";
 import "./style.css"
 import { useRouter } from 'next/navigation'
-import { IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
-import { ChevronLeft, AccountCircle, Build, Science, PrecisionManufacturing } from "@mui/icons-material";
-import MenuIcon from '@mui/icons-material/Menu';
+import { IconButton, Menu, MenuItem } from "@mui/material";
+import { AccountCircle, Build, Science, PrecisionManufacturing, KeyboardDoubleArrowDown } from "@mui/icons-material";
 
 const menuItems = [
   {url: "equipments", description: "Equipamentos", icon: <PrecisionManufacturing />},
@@ -20,48 +19,23 @@ export default function PrivateLayout({
   children: React.ReactNode;
 }>) {
   const router = useRouter();
-  const [openAsideMenu, setOpenAsideMenu] = React.useState(false);
+  const [openMenu, setOpenMenu] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   
   return (
-    <div className={`private-layout`}>     
-      <div className={`private-layout-aside-${openAsideMenu ? "open" : "close"}`}>
-        <div className="private-layout-aside-header">
-          <IconButton
-            className="private-layout-menu-icon"
-            onClick={() => setOpenAsideMenu(!openAsideMenu)}
-          >
-            <ChevronLeft />
-          </IconButton>
-        </div>
-        <List className="private-layout-aside-menu">
-          {menuItems.map((item) => (
-            <ListItem disablePadding key={item.url} >
-              <ListItemButton onClick={() => router.push(`/${item.url}`)}>
-                <ListItemIcon className="menu-item-icon">
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText 
-                  className="manu-item-text"
-                  primary={item.description}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </div>
-      <div className={`private-layout-screen`}>
+    <div className={`private-layout`}>
+      <div className={`private-layout-screen-header`}>
         <div className={`private-layout-header`}>
           <IconButton
-            className={`private-layout-header-menu-icon ${openAsideMenu && "hidden"}`}
-            onClick={() => setOpenAsideMenu(!openAsideMenu)}
+            onClick={() => setOpenMenu(!openMenu)}
           >
-            <MenuIcon />
+            <strong className="private-layout-header-menu-text">MENU</strong>
+            <KeyboardDoubleArrowDown className={`private-layout-header-menu-icon ${openMenu && "open"}`} />
           </IconButton>
           <strong className="private-layout-header-text">SGAMCE</strong>
           <div>
             <IconButton onClick={(event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget)} >
-              <AccountCircle className={`private-layout-header-user-icon ${openAsideMenu && "hidden"}`} />
+              <AccountCircle className={`private-layout-header-user-icon`} />
             </IconButton>
             <Menu
               id="basic-menu"
@@ -73,9 +47,22 @@ export default function PrivateLayout({
             </Menu>
           </div>
         </div>
-        <div className={`private-layout-body`}>
-          {children}
+        <div className={`private-layout-header-menu-${openMenu ? "open" : "close"}`}>
+          {openMenu && 
+          <div className="private-layout-header-menu-list">
+            {menuItems.map((item) => (
+              <IconButton  onClick={() => router.push(`/${item.url}`)} key={item.description}>
+                <div className="private-layout-header-menu-list-item">
+                  {item.icon}
+                  <span className="private-layout-header-menu-list-item-text">{item.description}</span>
+                </div>
+              </IconButton>
+          ))}
+          </div>}
         </div>
+      </div>
+      <div className={`private-layout-body`}>
+        {children}
       </div>
     </div>
   );
