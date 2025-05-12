@@ -3,11 +3,11 @@
   width: 80%;
 
   .icon-default {
-    color: rgba(0, 0, 0, 0.54);
+    color: var(--default-grey-color)
   }
   
   .icon-error {
-    color: #f00;
+    color: var(--default-red-color);
     justify-content: center;
   }
 

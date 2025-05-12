@@ -1,18 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --off-white-color: #f9f9f9;
-  --soft-white-color: #ede4d7;
-  --soft-blue-color: #09f;
-  --default-blue-color: #4174b3;
-  --dark-blue-color: #27548a;
-  --soft-black-color: #d0d0d0;
+  --off-white-color: #f9f9f9; /*background default and texts*/
+  --default-blue-color: #036; /*header and buttons*/
+  --default-green-color: #00b8a9; /*buttons hover*/
+  --default-red-color: #dc3545; /*errors and alerts*/
+  --soft-grey-color: #f4f7f9; /**/
+  --default-grey-color: #333; /*texts*/
+  --soft-black-color: #d0d0d0; /*divisors*/
 }
 
 .main {
   height: 100vh;
   overflow: auto;
   background-color: var(--soft-white-color);
+
+  span, strong {
+    color: var(--default-grey-color)
+  }
 }
 
 .flex {  

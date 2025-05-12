@@ -36,11 +36,18 @@
         color: var(--off-white-color);
         font-size: xx-large;
       }
+
+      .private-layout-header-text:hover {
+        cursor: pointer;
+        -webkit-user-select: none; /* Safari */
+        -ms-user-select: none; /* IE 10 and IE 11 */
+        user-select: none; /* Standard syntax */
+      }
     }
 
     .private-layout-header-menu-open {
       animation: fadeIn 0.3s forwards 0s 1 normal;
-      background-color: var(--soft-blue-color);
+      background-color: var(--default-blue-color);
       display: flex;
       width: 100%;
 
@@ -56,6 +63,8 @@
           
           .private-layout-header-menu-list-item-text {
             margin-left: 5px;
+            color: var(--off-white-color);
+            font-weight: 400;
           }
         }
       }
@@ -63,7 +72,7 @@
 
     .private-layout-header-menu-close {
       animation: fadeOut 0.3s forwards 0s 1 normal;
-      background-color: var(--soft-blue-color);
+      background-color: var(--default-blue-color);
       height: 0px;
     }
   }
