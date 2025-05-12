@@ -1,3 +1,4 @@
+import "./style.css"
 import React from "react";
 import { Button as MUIButton } from "@mui/material";
 
@@ -12,7 +13,7 @@ interface ButtonProps {
 export default function Button(props: ButtonProps) {
   return (
     <MUIButton
-      className={props.className}
+      className={`button ${props.className}`}
       disabled={props.disabled}
       loading={props.isLoading}
       onClick={props.onClick}
