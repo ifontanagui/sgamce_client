@@ -19,20 +19,18 @@ export default function PrivateLayout({
   children: React.ReactNode;
 }>) {
   const router = useRouter();
-  const [openMenu, setOpenMenu] = React.useState(false);
+  const [openMenu, setOpenMenu] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   
   return (
     <div className={`private-layout`}>
       <div className={`private-layout-screen-header`}>
         <div className={`private-layout-header`}>
-          <IconButton
-            onClick={() => setOpenMenu(!openMenu)}
-          >
+          <IconButton onClick={() => setOpenMenu(!openMenu)} >
             <strong className="private-layout-header-menu-text">MENU</strong>
             <KeyboardDoubleArrowDown className={`private-layout-header-menu-icon ${openMenu && "open"}`} />
           </IconButton>
-          <strong className="private-layout-header-text">SGAMCE</strong>
+          <strong className="private-layout-header-text" onClick={() => {router.push("/")}}>SGAMCE</strong>
           <div>
             <IconButton onClick={(event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget)} >
               <AccountCircle className={`private-layout-header-user-icon`} />
@@ -43,6 +41,7 @@ export default function PrivateLayout({
               open={!!anchorEl}
               onClose={() => setAnchorEl(null)}
             >
+              <MenuItem onClick={() => {router.push("/users")}}>Gerenciar Usuários</MenuItem>
               <MenuItem onClick={() => {router.push("/sign-in")}}>Sair</MenuItem>
             </Menu>
           </div>
