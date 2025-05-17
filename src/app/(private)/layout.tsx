@@ -4,13 +4,16 @@ import React from "react";
 import "./style.css"
 import { useRouter } from 'next/navigation'
 import { IconButton, Menu, MenuItem } from "@mui/material";
-import { AccountCircle, Build, Science, PrecisionManufacturing, KeyboardDoubleArrowDown } from "@mui/icons-material";
+import { AccountCircle, Attractions, Place, PrecisionManufacturing, KeyboardDoubleArrowDown, Category, CorporateFare } from "@mui/icons-material";
 
 const menuItems = [
-  {url: "equipments", description: "Equipamentos", icon: <PrecisionManufacturing />},
-  {url: "items", description: "Itens", icon: <><Science /><Science /></>},
-  {url: "maintenance", description: "Manutenções", icon: <Build />},
+  { description: "Categorias", url: "/categories", icon: <Category className="private-layout-header-sub-menu-list-item-icon"/> },
+  { description: "Equipamentos", url: "/equipments", icon: <PrecisionManufacturing className="private-layout-header-sub-menu-list-item-icon"/> },
+  { description: "Blocos", url: "/building", icon: <CorporateFare className="private-layout-header-sub-menu-list-item-icon"/> },
+  { description: "Salas", url: "/rooms", icon: <Place className="private-layout-header-sub-menu-list-item-icon"/> },
+  { description: "Eventos", url: "/events", icon: <Attractions className=".private-layout-header-menu-item-icon"/> },
 ] as const;
+
 
 export default function PrivateLayout({
 
@@ -20,7 +23,8 @@ export default function PrivateLayout({
 }>) {
   const router = useRouter();
   const [openMenu, setOpenMenu] = React.useState(true);
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [openUserMenu, setOpenUserMenu] = React.useState(false);
+  const [anchorUserMenu, setAnchorUserMenu] = React.useState<null | HTMLElement>(null);
   
   return (
     <div className={`private-layout`}>
@@ -32,14 +36,17 @@ export default function PrivateLayout({
           </IconButton>
           <strong className="private-layout-header-text" onClick={() => {router.push("/")}}>SGAMCE</strong>
           <div>
-            <IconButton onClick={(event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget)} >
+            <IconButton onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+              setOpenUserMenu(!openUserMenu);
+              setAnchorUserMenu(event.currentTarget);
+            }} >
               <AccountCircle className={`private-layout-header-user-icon`} />
             </IconButton>
             <Menu
               id="basic-menu"
-              anchorEl={anchorEl}
-              open={!!anchorEl}
-              onClose={() => setAnchorEl(null)}
+              anchorEl={anchorUserMenu}
+              open={!!anchorUserMenu}
+              onClose={() => setAnchorUserMenu(null)}
             >
               <MenuItem onClick={() => {router.push("/users")}}>Gerenciar Usuários</MenuItem>
               <MenuItem onClick={() => {router.push("/sign-in")}}>Sair</MenuItem>
@@ -49,14 +56,12 @@ export default function PrivateLayout({
         <div className={`private-layout-header-menu-${openMenu ? "open" : "close"}`}>
           {openMenu && 
           <div className="private-layout-header-menu-list">
-            {menuItems.map((item) => (
-              <IconButton  onClick={() => router.push(`/${item.url}`)} key={item.description}>
-                <div className="private-layout-header-menu-list-item">
-                  {item.icon}
-                  <span className="private-layout-header-menu-list-item-text">{item.description}</span>
-                </div>
-              </IconButton>
-          ))}
+            {menuItems.map((menu) => (
+              <div className="private-layout-header-menu-list-item flex" onClick={() => router.push(menu.url)} key={menu.description}>
+                {menu.icon}
+                <span className="private-layout-header-menu-list-item-text">{menu.description}</span>
+              </div>
+            ))}
           </div>}
         </div>
       </div>

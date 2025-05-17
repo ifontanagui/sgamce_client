@@ -50,25 +50,50 @@
       background-color: var(--default-blue-color);
       display: flex;
       width: 100%;
+      overflow: hidden;
 
       .private-layout-header-menu-list {
         width: 100%;
         display: flex;
+        flex-wrap: wrap;
         justify-content: space-evenly;
         align-items: center;
-
+        
         .private-layout-header-menu-list-item {
           color: var(--off-white-color);
           font-size: medium;
+          flex-grow: 1;
+          flex-basis: 200px;
+          padding: 10px 0;
+          margin: 5px;
+          cursor: pointer;
+          border-radius: 10px;
+
+          .private-layout-header-menu-item-icon {
+            margin-right: 10px;
+          }
+
+          .private-layout-header-sub-menu-item-icon {
+            transition: transform 0.3s ease;
+            margin-left: 10px;
+          }
+          
+          .open {
+            transform: rotate(-180deg);
+          }
           
           .private-layout-header-menu-list-item-text {
-            margin-left: 5px;
+            margin: 0 5px 0 10px;
             color: var(--off-white-color);
             font-weight: 400;
           }
         }
+
+        .private-layout-header-menu-list-item:hover {
+          background-color: var(--dark-blue-color);
+        }
       }
-    }   
+    }
 
     .private-layout-header-menu-close {
       animation: fadeOut 0.3s forwards 0s 1 normal;
@@ -87,10 +112,10 @@
 
 @keyframes fadeIn {
   from {
-    height: 0;
+    max-height: 0;
   }
   to {
-    height: 65px;
+    max-height: 650px;
   }
 }
 
