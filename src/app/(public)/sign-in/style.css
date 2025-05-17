@@ -57,21 +57,10 @@
       width: 70%;
       height: 10%;
       margin-top: 30px;
-      background-color: var(--default-blue-color);
-    }
-    
-    .sign-in-button:hover {
-      background-color: var(--default-green-color);
     }
   }
 }
 
-.MuiButton-loadingIndicator {
-  span {
-    color: var(--off-white-color);
-  }
-}
-  
 @keyframes slide {
   0% {
     transform:translateX(-25%);
