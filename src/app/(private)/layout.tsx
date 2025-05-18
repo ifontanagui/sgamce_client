@@ -68,6 +68,11 @@ export default function PrivateLayout({
       <div className={`private-layout-body`}>
         {children}
       </div>
+      <div className={`private-layout-footer`}>
+        <span>By:&nbsp;</span>
+        <a target="_blank" rel="noopener noreferrer" href="https://github.com/ifontanagui">Guilherme Fontana</a>
+        <span>&nbsp;✌️</span>
+      </div>
     </div>
   );
 }

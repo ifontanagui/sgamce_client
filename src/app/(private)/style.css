@@ -109,6 +109,20 @@
     overflow: auto;
     padding: 20px;
   }
+
+  .private-layout-footer {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+
+    span, a {
+      color: var(--soft-grey-color)
+    }
+
+    a {
+      text-decoration: underline;
+    }
+  }
 }
 
 @keyframes fadeIn {
