@@ -1,8 +1,9 @@
 .table {
   .table-header {
-    background-color: var(--default-blue-color);
+    background-color: var(--dark-blue-color);
     height: 50px;
     font-size: medium;
+    z-index: 999;
     
     .table-header-cell {
       color: var(--off-white-color)
