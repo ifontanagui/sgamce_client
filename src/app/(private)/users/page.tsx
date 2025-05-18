@@ -6,6 +6,7 @@ import DefaultActions from '@/components/DefaultActions';
 import Table, { IRow } from "@/components/Table";
 import InputText from '@/components/InputText';
 import { FormGroup, FormControlLabel, Checkbox } from '@mui/material';
+import DefaultSkeleton from '@/components/DefaultSkeleton';
 
 const OGRows = [
   { data: ['Renato Heitor Nascimento', 'rhnascimento@ucs.br', true], subList: { headers: ["Bloco", "Sala"], title: "Salas", rows: [["Bloco A", 201],["Bloco A", 202],["Bloco A", 203],["Bloco A", 204],["Bloco A", 205],["Bloco A", 206],["Bloco A", 207],["Bloco A", 208],["Bloco A", 209],] } },
@@ -118,16 +119,28 @@ function AddDrawer(props: {
 }
 
 export default function Users() {
+  const [reload, setReload] = React.useState(true);
   const [userFilter, setUserFilter] = React.useState("");
   const [username, setUsername] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confPassword, setConfPassword] = React.useState("");
   const [isAdmin, setIsAdmin] = React.useState(false);
-  const [reload, setReload] = React.useState(false);
   const [newlyOpened, setNewlyOpened] = React.useState(true);
   const [differentPassword, setDifferentPassword] = React.useState(false);
+  
+  React.useEffect(() => {
+    const fetchData = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
 
+    if (reload) {
+      fetchData()
+        .catch(console.error);
+
+      setReload(false);
+    }
+  }, [reload])
   
   const handleFilterClick = async () => {
     rows = OGRows;
@@ -168,24 +181,26 @@ export default function Users() {
   }
 
   return (
-    <div className="users">
-      <div className="users-header">
-        <strong className='users-header-title'>Gerenciamento de Usuários</strong>
-        <DefaultActions
-          refreshAction={handleFilterClick}
-          addPage={AddDrawer({ username, setUsername, email, setEmail, password, setPassword, confPassword, setConfPassword, isAdmin, setIsAdmin, differentPassword, newlyOpened })}
-          filtersDialog={FilterDialog({userFilter, setUserFilter})}
-          filtersDialogClassName='user-filter-dialog'
-          filterAction={handleFilterClick}
-          addAction={handleAddUserClick}
-          onCloseAddForm={handleCloseAddUser}
-        />
-      </div>
-      <Table
-        headers={['Nome', 'Email', 'Administrador']}
-        rows={rows}
-        className="users-table"
-      />
-    </div>
+    reload
+      ? <DefaultSkeleton />
+      : <div className="users">
+          <div className="users-header">
+            <strong className='users-header-title'>Gerenciamento de Usuários</strong>
+            <DefaultActions
+              refreshAction={handleFilterClick}
+              addPage={AddDrawer({ username, setUsername, email, setEmail, password, setPassword, confPassword, setConfPassword, isAdmin, setIsAdmin, differentPassword, newlyOpened })}
+              filtersDialog={FilterDialog({userFilter, setUserFilter})}
+              filtersDialogClassName='user-filter-dialog'
+              filterAction={handleFilterClick}
+              addAction={handleAddUserClick}
+              onCloseAddForm={handleCloseAddUser}
+            />
+          </div>
+          <Table
+            headers={['Nome', 'Email', 'Administrador']}
+            rows={rows}
+            className="users-table"
+          />
+        </div>
   )
 }
