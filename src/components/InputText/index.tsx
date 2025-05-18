@@ -14,6 +14,7 @@ interface InputTextProps {
   required?: boolean
   type: "email" | "number" | "password" | "text"
   value: string;
+  hiddenDefaultIcon?: boolean
   onChange: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>
 }
 
@@ -32,9 +33,9 @@ export default function InputText(props: InputTextProps) {
     <Box className={`input-text flex ${props.className}`} sx={{ display: 'flex', alignItems: props.error ? 'center' : 'flex-end' }}>
       {
         (props.icon && <div className={`input-text-custom-icon ${props.error ? " icon-error" : " icon-default"}`}>{props.icon}</div>) ||
-        (!props.icon && props.type === "email" && <AccountCircle className={props.error ? "icon-error" : "icon-default"} sx={{ mr: 1, my: 0.5 }} />) ||
-        (!props.icon && props.type === "password" && <Lock className={props.error ? "icon-error" : "icon-default"} sx={{ mr: 1, my: 0.5 }} />) ||
-        (!props.icon && props.type !== "email" && props.type !== "password" && <Icon />)
+        (!props.icon && !props.hiddenDefaultIcon && props.type === "email" && <AccountCircle className={props.error ? "icon-error" : "icon-default"} sx={{ mr: 1, my: 0.5 }} />) ||
+        (!props.icon && !props.hiddenDefaultIcon && props.type === "password" && <Lock className={props.error ? "icon-error" : "icon-default"} sx={{ mr: 1, my: 0.5 }} />) ||
+        (!props.icon && props.hiddenDefaultIcon && props.type !== "email" && props.type !== "password" && <Icon />)
       }
       <TextField 
         className="input-text-input"
