@@ -1,0 +1,16 @@
+
+.skeleton {
+  .skeleton-header {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 100px;
+    margin-bottom: 20px;
+
+    .skeleton-header-actions {
+      display: flex;
+      flex-direction: row;
+      gap: 10px
+    }
+  }
+}
