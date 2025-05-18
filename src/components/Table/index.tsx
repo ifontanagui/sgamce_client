@@ -59,6 +59,7 @@ function Row({ row, withSubList }: RowProps) {
             </TableCell>
         ))}
       </TableRow>
+      {withSubList &&
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit className='table-row-sublist' >
@@ -108,7 +109,7 @@ function Row({ row, withSubList }: RowProps) {
             </TableContainer>
           </Collapse>
         </TableCell>
-      </TableRow>
+      </TableRow>}
     </>
   );
 }
@@ -141,13 +142,20 @@ export default function Table({ headers, rows, className }: TableProps ) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+            {rows.length 
+              ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                <Row
+                  key={Math.random()}
+                  row={row}
+                  withSubList={haveSubList}
+                />
+              ))
+                : 
               <Row
-                key={Math.random()}
-                row={row}
-                withSubList={haveSubList}
+                row={{ data: ["Nenhum dado encontrado"] }}
+                withSubList={false}
               />
-            ))}
+            }
           </TableBody>
         </MUITable>
       </TableContainer>
