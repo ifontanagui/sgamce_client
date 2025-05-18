@@ -107,6 +107,7 @@
     width: 100%;
     background-color: var(--off-white-color);
     overflow: auto;
+    padding: 20px;
   }
 }
 
