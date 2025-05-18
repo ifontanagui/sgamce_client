@@ -130,17 +130,13 @@ export default function Users() {
   const [differentPassword, setDifferentPassword] = React.useState(false);
   
   React.useEffect(() => {
-    const fetchData = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-    }
-
     if (reload) {
-      fetchData()
-        .catch(console.error);
-
-      setReload(false);
-    }
-  }, [reload])
+      (async () => {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        setReload(false);
+      })().catch(console.error);
+  }
+}, [reload]);
   
   const handleFilterClick = async () => {
     rows = OGRows;
