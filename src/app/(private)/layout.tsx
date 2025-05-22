@@ -4,14 +4,13 @@ import React from "react";
 import "./style.css"
 import { useRouter } from 'next/navigation'
 import { IconButton, Menu, MenuItem } from "@mui/material";
-import { AccountCircle, Attractions, Place, PrecisionManufacturing, KeyboardDoubleArrowDown, Category, CorporateFare } from "@mui/icons-material";
+import { AccountCircle, Place, PrecisionManufacturing, KeyboardDoubleArrowDown, Category, CorporateFare } from "@mui/icons-material";
 
 const menuItems = [
   { description: "Categorias", url: "/categories", icon: <Category className="private-layout-header-sub-menu-list-item-icon"/> },
   { description: "Equipamentos", url: "/equipments", icon: <PrecisionManufacturing className="private-layout-header-sub-menu-list-item-icon"/> },
   { description: "Blocos", url: "/building", icon: <CorporateFare className="private-layout-header-sub-menu-list-item-icon"/> },
-  { description: "Salas", url: "/rooms", icon: <Place className="private-layout-header-sub-menu-list-item-icon"/> },
-  { description: "Eventos", url: "/events", icon: <Attractions className=".private-layout-header-menu-item-icon"/> },
+  { description: "Salas e Laboratórios", url: "/rooms", icon: <Place className="private-layout-header-sub-menu-list-item-icon"/> },
 ] as const;
 
 
