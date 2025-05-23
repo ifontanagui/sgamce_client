@@ -2,7 +2,7 @@
 
 import './style.css'
 import React from 'react';
-import { KeyboardArrowUp, Check, Clear}  from '@mui/icons-material';
+import { KeyboardArrowUp, Check, Clear, Delete, Edit }  from '@mui/icons-material';
 import { Collapse, IconButton, Table as MUITable, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from '@mui/material';
 
 export interface IRow {
@@ -17,15 +17,19 @@ export interface IRow {
 interface TableProps {
   headers: string[],
   rows: IRow[],
+  editAction(row: IRow): void,
+  deleteAction(row: IRow): void,
   className?: string
 }
 
 interface RowProps {
   row: IRow;
   withSubList: boolean
+  editAction(row: IRow): void
+  deleteAction(row: IRow): void
 }
 
-function Row({ row, withSubList }: RowProps) {
+function Row({ row, withSubList, editAction, deleteAction }: RowProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -45,6 +49,12 @@ function Row({ row, withSubList }: RowProps) {
             </IconButton>
           </TableCell>
         }
+        <TableCell className='table-row-sublist-list-header-cell-icon' >
+          <IconButton onClick={() => deleteAction(row)}><Delete color='error' /></IconButton>
+        </TableCell>
+        <TableCell className='table-row-sublist-list-header-cell-icon' >
+          <IconButton onClick={() => editAction(row)}><Edit /></IconButton>
+        </TableCell>
         {row.data.map(r => (
             <TableCell key={Math.random()} align="left">
               {
@@ -114,7 +124,7 @@ function Row({ row, withSubList }: RowProps) {
   );
 }
 
-export default function Table({ headers, rows, className }: TableProps ) {
+export default function Table({ headers, rows, editAction, deleteAction, className }: TableProps ) {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [page, setPage] = React.useState(0);
   const haveSubList = rows.some(x => !!x.subList);
@@ -135,6 +145,8 @@ export default function Table({ headers, rows, className }: TableProps ) {
           <TableHead >
             <TableRow >
               {haveSubList && <TableCell className='table-header' />}
+              <TableCell className='table-header' />
+              <TableCell className='table-header' />
               {headers.map(x => 
                 <TableCell className='table-header' align="left" key={Math.random()}>
                   {<strong className='table-header-cell'>{x}</strong>}
@@ -148,12 +160,16 @@ export default function Table({ headers, rows, className }: TableProps ) {
                   key={Math.random()}
                   row={row}
                   withSubList={haveSubList}
+                  deleteAction={deleteAction}
+                  editAction={editAction}
                 />
               ))
                 : 
               <Row
                 row={{ data: ["Nenhum dado encontrado"] }}
                 withSubList={false}
+                deleteAction={deleteAction}
+                editAction={editAction}
               />
             }
           </TableBody>
