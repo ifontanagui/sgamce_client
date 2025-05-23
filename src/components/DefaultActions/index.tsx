@@ -3,7 +3,7 @@
 import React, { ReactElement } from 'react';
 import './style.css'
 import { FilterList, RefreshOutlined, AddCircleOutline } from '@mui/icons-material';
-import { Dialog, Drawer, IconButton } from '@mui/material';
+import { Dialog, IconButton } from '@mui/material';
 import Button from '../Button';
 
 interface DefaultActionsProps {
@@ -11,14 +11,11 @@ interface DefaultActionsProps {
   filtersDialog: ReactElement;
   filtersDialogClassName?: string;
   filterAction: React.MouseEventHandler<HTMLButtonElement>
-  addPage: ReactElement;
-  addAction(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): Promise<boolean>;
-  onCloseAddForm: () => void
+  addAction:  () => void
 }
 
 export default function DefaultActions(props: DefaultActionsProps) {
   const [openDialog, setOpenDialog] = React.useState(false);
-  const [openDrawer, setOpenDrawer] = React.useState(false);
 
   return (
     <div className='default-actions'>
@@ -28,7 +25,7 @@ export default function DefaultActions(props: DefaultActionsProps) {
       <IconButton onClick={() => setOpenDialog(true)}>
         <FilterList className='default-actions-icon' />
       </IconButton>
-      <IconButton onClick={() => setOpenDrawer(true)}>
+      <IconButton onClick={() => props.addAction()}>
         <AddCircleOutline className='default-actions-icon' />
       </IconButton>
       <Dialog
@@ -52,26 +49,6 @@ export default function DefaultActions(props: DefaultActionsProps) {
           </div>
         </div>
       </Dialog>
-      <Drawer
-        anchor='right'
-        open={openDrawer}
-        onClose={() => {
-          props.onCloseAddForm();
-          setOpenDrawer(false);
-        }}
-      >
-        <div className='add-drawer'>
-          {props.addPage}
-          <Button 
-            onClick={async (event) => {
-              const result = await props.addAction(event);
-              if (result)
-                setOpenDrawer(false);
-            }} 
-            textContent='Salvar'
-            />
-        </div>
-      </Drawer>
     </div>
     
   )
