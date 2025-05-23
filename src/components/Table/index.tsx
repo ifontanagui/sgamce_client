@@ -50,10 +50,10 @@ function Row({ row, withSubList, editAction, deleteAction }: RowProps) {
           </TableCell>
         }
         <TableCell className='table-row-sublist-list-header-cell-icon' >
-          <IconButton onClick={() => deleteAction(row)}><Delete color='error' /></IconButton>
+          <IconButton onClick={() => deleteAction(row)}><Delete className='delete' /></IconButton>
         </TableCell>
         <TableCell className='table-row-sublist-list-header-cell-icon' >
-          <IconButton onClick={() => editAction(row)}><Edit /></IconButton>
+          <IconButton onClick={() => editAction(row)}><Edit className='edit' /></IconButton>
         </TableCell>
         {row.data.map(r => (
             <TableCell key={Math.random()} align="left">

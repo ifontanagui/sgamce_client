@@ -21,6 +21,14 @@
       padding:0 0 0 5px;
     }
 
+    .edit {
+      color: var(--default-blue-color);
+    }
+
+    .delete {
+      color: var(--default-red-color);
+    }
+
     .close {
       transform: rotate(-180deg);
     }
