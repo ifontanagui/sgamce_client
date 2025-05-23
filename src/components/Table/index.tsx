@@ -139,7 +139,7 @@ export default function Table({ headers, rows, editAction, deleteAction, classNa
   };
 
   return (
-    <div>
+    <>
       <TableContainer className={className}>
         <MUITable className='table' stickyHeader sx={{ overflow: 'auto', height: 'auto', maxHeight: '100%', minWidth: 650 }} size="small" aria-label="a dense table">
           <TableHead >
@@ -184,6 +184,6 @@ export default function Table({ headers, rows, editAction, deleteAction, classNa
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-    </div>
+    </>
   );
 }
