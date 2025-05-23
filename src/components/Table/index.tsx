@@ -39,7 +39,7 @@ function Row({ row, withSubList, editAction, deleteAction }: RowProps) {
         onClick={() => setOpen(!open)}
       >
           {withSubList &&
-          <TableCell>
+          <TableCell className='table-row-sublist-list-header-cell-icon' >
             <IconButton
               aria-label="expand row"
               size="small"

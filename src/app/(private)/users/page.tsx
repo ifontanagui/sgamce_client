@@ -5,8 +5,9 @@ import React from 'react';
 import DefaultActions from '@/components/DefaultActions';
 import Table, { IRow } from "@/components/Table";
 import InputText from '@/components/InputText';
-import { FormGroup, FormControlLabel, Checkbox } from '@mui/material';
+import { FormGroup, FormControlLabel, Checkbox, Drawer } from '@mui/material';
 import DefaultSkeleton from '@/components/DefaultSkeleton';
+import Button from "@/components/Button";
 
 const OGRows = [
   { data: ['Renato Heitor Nascimento', 'rhnascimento@ucs.br', true], subList: { headers: ["Bloco", "Sala"], title: "Salas", rows: [["Bloco A", 201],["Bloco A", 202],["Bloco A", 203],["Bloco A", 204],["Bloco A", 205],["Bloco A", 206],["Bloco A", 207],["Bloco A", 208],["Bloco A", 209],] } },
@@ -44,80 +45,6 @@ function FilterDialog(props: {
   )
 }
 
-function AddDrawer(props: {
-  username: string, 
-  setUsername: React.Dispatch<React.SetStateAction<string>>
-  email: string, 
-  setEmail: React.Dispatch<React.SetStateAction<string>>
-  password: string, 
-  setPassword: React.Dispatch<React.SetStateAction<string>>
-  confPassword: string, 
-  setConfPassword: React.Dispatch<React.SetStateAction<string>>
-  isAdmin: boolean, 
-  setIsAdmin: React.Dispatch<React.SetStateAction<boolean>>
-  differentPassword: boolean
-  newlyOpened: boolean
-}) {
-  return (
-    <div className='user-drawer'>
-      <strong className='user-drawer-title'>Cadastrar Usuário</strong>
-      <InputText
-        type='text'
-        placeholder='Nome'
-        required
-        value={props.username}
-        className='user-data-input'
-        error={!props.newlyOpened && !props.username}
-        helperText='É obrigatório informar o nome do usuário'
-        onChange={(event) => { props.setUsername(event.target.value) }}
-      />
-      <InputText
-        type='email'
-        placeholder='Email'
-        required
-        value={props.email}
-        hiddenDefaultIcon
-        className='user-data-input'
-        error={!props.newlyOpened && !props.email}
-        helperText='É obrigatório informar o email do usuário'
-        onChange={(event) => { props.setEmail(event.target.value) }}
-      />
-      <InputText
-        type='password'
-        placeholder='Senha'
-        required
-        value={props.password}
-        hiddenDefaultIcon
-        className='user-data-input'
-        helperText={!props.password ? 'É obrigatório informar uma senha' : 'As senhas não conferem'}
-        error={props.differentPassword || (!props.newlyOpened && !props.password)}
-        onChange={(event) => { props.setPassword(event.target.value) }}
-      />
-      <InputText
-        type='password'
-        placeholder='Confirmar Senha'
-        required
-        value={props.confPassword}
-        hiddenDefaultIcon
-        className='user-data-input'
-        error={props.differentPassword || (!props.newlyOpened && !props.password)}
-        helperText={!props.password && !props.confPassword ? 'É obrigatório confirmar a senha' : 'As senhas não conferem'}
-        onChange={(event) => { props.setConfPassword(event.target.value) }}
-      />
-      <FormGroup className='is-admin-checkbox'>
-        <FormControlLabel 
-          control={
-            <Checkbox 
-              value={props.isAdmin}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => { props.setIsAdmin(event.target.checked); }}
-            />
-          } 
-          label="Administrador" />
-      </FormGroup>
-    </div>
-  );
-}
-
 export default function Users() {
   const [reload, setReload] = React.useState(true);
   const [userFilter, setUserFilter] = React.useState("");
@@ -128,11 +55,13 @@ export default function Users() {
   const [isAdmin, setIsAdmin] = React.useState(false);
   const [newlyOpened, setNewlyOpened] = React.useState(true);
   const [differentPassword, setDifferentPassword] = React.useState(false);
+  const [openDrawer, setOpenDrawer] = React.useState(false);
+  const [isEdit, setIsEdit] = React.useState(false);
   
   React.useEffect(() => {
     if (reload) {
       (async () => {
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         setReload(false);
       })().catch(console.error);
   }
@@ -156,11 +85,13 @@ export default function Users() {
       setDifferentPassword(true);
       return false;
     }
-
-    rows.push({
-      data: [ username, email,isAdmin ]
-    })
-
+    
+    if (!isEdit)
+      rows.push({
+        data: [ username, email,isAdmin ]
+      })
+    
+    setIsEdit(false);
     handleCloseAddUser();
 
     return true;
@@ -176,6 +107,27 @@ export default function Users() {
     setNewlyOpened(true);
   }
 
+  const handleAddButtonClick = () => {
+    setOpenDrawer(true)    
+  }
+  
+  const handleDeleteUserClick = (row: IRow) => {
+    rows = rows.filter(r => r.data[0] !== row.data[0])
+
+    setReload(true);
+  }
+
+  const handleEditCategoryAction = (row: IRow) => {
+    setUsername(row.data[0].toString());
+    setEmail(row.data[1].toString());
+    setPassword("132123123113");
+    setConfPassword("132123123113");
+    setIsAdmin(!row.data[2]);
+
+    setOpenDrawer(true);
+  }
+
+
   return (
     reload
       ? <DefaultSkeleton />
@@ -184,19 +136,93 @@ export default function Users() {
             <strong className='users-header-title'>Gerenciamento de Usuários</strong>
             <DefaultActions
               refreshAction={handleFilterClick}
-              addPage={AddDrawer({ username, setUsername, email, setEmail, password, setPassword, confPassword, setConfPassword, isAdmin, setIsAdmin, differentPassword, newlyOpened })}
               filtersDialog={FilterDialog({userFilter, setUserFilter})}
               filtersDialogClassName='user-filter-dialog'
               filterAction={handleFilterClick}
-              addAction={handleAddUserClick}
-              onCloseAddForm={handleCloseAddUser}
+              addAction={() => {handleAddButtonClick()}}
             />
           </div>
           <Table
             headers={['Nome', 'Email', 'Administrador']}
             rows={rows}
             className="users-table"
+            deleteAction={handleDeleteUserClick}
+            editAction={handleEditCategoryAction}
           />
+          <Drawer
+            anchor='right'
+            open={openDrawer}
+            onClose={() => {
+            handleCloseAddUser();
+            setOpenDrawer(false);
+            }}
+          >
+            <div className='user-drawer'>
+              <strong className='user-drawer-title'>Cadastrar Usuário</strong>
+              <InputText
+                type='text'
+                placeholder='Nome'
+                required
+                value={username}
+                className='user-data-input'
+                error={!newlyOpened && !username}
+                helperText='É obrigatório informar o nome do usuário'
+                onChange={(event) => { setUsername(event.target.value) }}
+              />
+              <InputText
+                type='email'
+                placeholder='Email'
+                required
+                value={email}
+                hiddenDefaultIcon
+                className='user-data-input'
+                error={!newlyOpened && !email}
+                helperText='É obrigatório informar o email do usuário'
+                onChange={(event) => { setEmail(event.target.value) }}
+              />
+              <InputText
+                type='password'
+                placeholder='Senha'
+                required
+                value={password}
+                hiddenDefaultIcon
+                className='user-data-input'
+                helperText={!password ? 'É obrigatório informar uma senha' : 'As senhas não conferem'}
+                error={differentPassword || (!newlyOpened && !password)}
+                onChange={(event) => { setPassword(event.target.value) }}
+              />
+              <InputText
+                type='password'
+                placeholder='Confirmar Senha'
+                required
+                value={confPassword}
+                hiddenDefaultIcon
+                className='user-data-input'
+                error={differentPassword || (!newlyOpened && !password)}
+                helperText={!password && !confPassword ? 'É obrigatório confirmar a senha' : 'As senhas não conferem'}
+                onChange={(event) => { setConfPassword(event.target.value) }}
+              />
+              <FormGroup className='is-admin-checkbox'>
+                <FormControlLabel 
+                  control={
+                    <Checkbox 
+                      value={isAdmin}
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setIsAdmin(event.target.checked); }}
+                    />
+                  } 
+                  label="Administrador" />
+              </FormGroup>
+              <Button 
+                className="save-button"
+                onClick={async () => {
+                  const result = await handleAddUserClick();
+                  if (result)
+                    setOpenDrawer(false);
+                }} 
+                textContent='Salvar'
+              />
+            </div>
+          </Drawer>
         </div>
   )
 }

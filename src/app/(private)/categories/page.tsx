@@ -6,6 +6,9 @@ import DefaultSkeleton from "@/components/DefaultSkeleton";
 import Table, { IRow } from "@/components/Table";
 import DefaultActions from "@/components/DefaultActions";
 import InputText from "@/components/InputText";
+import { Drawer } from "@mui/material";
+import Button from "@/components/Button";
+
 
 const OGRows = [
   { data: ["Categoria 00"] },
@@ -39,38 +42,19 @@ function FilterDialog(props: {
   )
 }
 
-function AddDrawer(props: {
-  name: string, 
-  setName: React.Dispatch<React.SetStateAction<string>>
-  newlyOpened: boolean
-}) {
-  return (
-    <div className='category-drawer'>
-      <strong className='category-drawer-title'>Cadastrar Categoria</strong>
-      <InputText
-        type='text'
-        placeholder='Nome'
-        required
-        value={props.name}
-        className='category-data-input'
-        error={!props.newlyOpened && !props.name}
-        helperText='É obrigatório informar o nome da categoria'
-        onChange={(event) => { props.setName(event.target.value) }}
-      />
-    </div>
-  );
-}
 
 export default function Categories() {
   const [reload, setReload] = React.useState(true);
   const [nameFilter, setNameFilter] = React.useState("");
   const [name, setName] = React.useState("");
   const [newlyOpened, setNewlyOpened] = React.useState(true);
+  const [openDrawer, setOpenDrawer] = React.useState(false);
+  const [isEdit, setIsEdit] = React.useState(false);
   
   React.useEffect(() => {
   if (reload) {
     (async () => {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setReload(false);
     })().catch(console.error);
   }
@@ -87,13 +71,15 @@ export default function Categories() {
 
   const handleAddUCategoryClick = async() => {
     setNewlyOpened(false);
-
+    
     if (!name) return false;
 
-    rows.push({
-      data: [ name ]
-    })
-
+    if (!isEdit)
+      rows.push({
+        data: [ name ]
+      })
+    
+    setIsEdit(false);
     handleCloseAddUser();
 
     return true;
@@ -102,6 +88,21 @@ export default function Categories() {
   const handleCloseAddUser = () => {   
     setName("");
     setNewlyOpened(true);
+  }
+
+  const handleDeleteUserClick = (row: IRow) => {
+    rows = rows.filter(r => r.data[0] !== row.data[0])
+
+    setReload(true);
+  }
+
+  const handleEditCategoryAction = (row: IRow) => {
+    setName(row.data[0].toString());
+    setOpenDrawer(true);
+  }
+
+  const handleAddButtonClick = () => {
+    setOpenDrawer(true)    
   }
   
   return (
@@ -112,18 +113,49 @@ export default function Categories() {
               <strong className='categories-header-title'>Categorias</strong>
               <DefaultActions
                 refreshAction={handleFilterClick}
-                addPage={AddDrawer({ name, setName, newlyOpened })}
                 filtersDialog={FilterDialog({nameFilter, setNameFilter})}
                 filterAction={handleFilterClick}
-                addAction={handleAddUCategoryClick}
-                onCloseAddForm={handleCloseAddUser}
+                addAction={() => {handleAddButtonClick()}}
               />
             </div>
             <Table
               headers={['Nome']}
               rows={rows}
               className="categories-table"
+              deleteAction={handleDeleteUserClick}
+              editAction={handleEditCategoryAction}
             />
+            <Drawer
+              anchor='right'
+              open={openDrawer}
+              onClose={() => {
+              handleCloseAddUser();
+              setOpenDrawer(false);
+              }}
+            >
+              <div className='category-drawer'>
+                <strong className='category-drawer-title'>Cadastrar Categoria</strong>
+                <InputText
+                  type='text'
+                  placeholder='Nome'
+                  required
+                  value={name}
+                  className='category-data-input'
+                  error={!newlyOpened && !name}
+                  helperText='É obrigatório informar o nome da categoria'
+                  onChange={(event) => { setName(event.target.value) }}
+                />
+                <Button 
+                  className="save-button"
+                  onClick={async () => {
+                    const result = await handleAddUCategoryClick();
+                    if (result)
+                      setOpenDrawer(false);
+                  }} 
+                  textContent='Salvar'
+                />
+              </div>
+            </Drawer>
           </div>
   )
 }

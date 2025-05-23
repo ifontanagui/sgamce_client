@@ -26,11 +26,18 @@
 }
 
 .category-drawer {
-  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
+  height: 100%;
+
+
+  width: 50vw;
+  min-width: 200px;
+  height: 100%;
+  justify-content: space-between;
+  padding: 20px;
 
   .category-drawer-title {
     font-size: larger;
@@ -39,5 +46,10 @@
 
   .category-data-input {
     width: 100%;
+  }
+
+  .save-button {
+    width: 100%;
+    height: 50px;
   }
 }
