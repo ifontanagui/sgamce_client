@@ -6,8 +6,8 @@ import DefaultSkeleton from "@/components/DefaultSkeleton";
 import Table, { IRow } from "@/components/Table";
 import DefaultActions from "@/components/DefaultActions";
 import InputText from "@/components/InputText";
-import { Drawer } from "@mui/material";
 import Button from "@/components/Button";
+import { Drawer } from "@mui/material";
 
 
 const OGRows = [
@@ -80,17 +80,17 @@ export default function Categories() {
       })
     
     setIsEdit(false);
-    handleCloseAddUser();
+    handleCloseAddCategory();
 
     return true;
   }
 
-  const handleCloseAddUser = () => {   
+  const handleCloseAddCategory = () => {   
     setName("");
     setNewlyOpened(true);
   }
 
-  const handleDeleteUserClick = (row: IRow) => {
+  const handleDeleteCategoryClick = (row: IRow) => {
     rows = rows.filter(r => r.data[0] !== row.data[0])
 
     setReload(true);
@@ -122,14 +122,14 @@ export default function Categories() {
               headers={['Nome']}
               rows={rows}
               className="categories-table"
-              deleteAction={handleDeleteUserClick}
+              deleteAction={handleDeleteCategoryClick}
               editAction={handleEditCategoryAction}
             />
             <Drawer
               anchor='right'
               open={openDrawer}
               onClose={() => {
-              handleCloseAddUser();
+              handleCloseAddCategory();
               setOpenDrawer(false);
               }}
             >
