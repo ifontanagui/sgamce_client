@@ -103,17 +103,22 @@
   }
     
   .private-layout-body {
-    height: 100%;
+    height: calc(100% - 120px);
     width: 100%;
     background-color: var(--off-white-color);
     overflow: auto;
-    padding: 20px;
+    padding: 10px;
+    top: 120px;
+    position: absolute;
   }
 
   .private-layout-footer {
     display: flex;
     justify-content: center;
     gap: 7px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
 
     span, a {
       color: var(--soft-grey-color)

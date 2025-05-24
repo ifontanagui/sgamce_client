@@ -1,0 +1,65 @@
+.rooms {
+  .rooms-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    .rooms-header-title {
+      color: var(--default-blue-color);
+      font-size: larger;
+    }
+  }
+
+  .add-room-action {
+    width: 45px;
+    display: flex;
+    justify-content: center;
+
+    .add-room-action-icon {
+      color: var(--default-blue-color)
+    }
+  }
+}
+
+.rooms-filter-input {
+  width: 100% !important;
+}
+
+
+.room-filter-dialog {
+  width: 600px;
+}
+
+.rooms-table {
+  max-height: 70vh;
+}
+
+.room-drawer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  height: 100%;
+
+
+  width: 50vw;
+  min-width: 200px;
+  height: 100%;
+  justify-content: space-between;
+  padding: 20px;
+
+  .room-drawer-title {
+    font-size: larger;
+    color: var(--default-blue-color)
+  }
+
+  .room-data-input {
+    width: 100%;
+  }
+
+  .save-button {
+    width: 100%;
+    height: 50px;
+  }
+}
