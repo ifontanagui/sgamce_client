@@ -34,13 +34,17 @@ interface MultiTabsProps {
       icon?: React.ReactElement
       content: React.ReactNode,
     }[]
+  externalTabsController?: number,
+  setExternalTabsController?: React.Dispatch<React.SetStateAction<number>>
 }
 
 export default function MultiTabs(props: MultiTabsProps) {
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = React.useState(props.externalTabsController || 0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
+    if (props.setExternalTabsController)
+      props.setExternalTabsController(newValue);
   };
 
   const tabsHeader: React.ReactNode[] = [];
