@@ -20,6 +20,7 @@ interface TableProps {
   editAction(row: IRow): void,
   deleteAction(row: IRow): void,
   className?: string
+  headerActions?: React.ReactNode
 }
 
 interface RowProps {
@@ -27,9 +28,11 @@ interface RowProps {
   withSubList: boolean
   editAction(row: IRow): void
   deleteAction(row: IRow): void
+  emptyTable?: boolean
+  headerActions?: React.ReactNode
 }
 
-function Row({ row, withSubList, editAction, deleteAction }: RowProps) {
+function Row({ row, withSubList, editAction, deleteAction, emptyTable, headerActions }: RowProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -49,12 +52,17 @@ function Row({ row, withSubList, editAction, deleteAction }: RowProps) {
             </IconButton>
           </TableCell>
         }
-        <TableCell className='table-row-sublist-list-header-cell-icon' >
-          <IconButton onClick={() => deleteAction(row)}><Delete className='delete' /></IconButton>
-        </TableCell>
-        <TableCell className='table-row-sublist-list-header-cell-icon' >
-          <IconButton onClick={() => editAction(row)}><Edit className='edit' /></IconButton>
-        </TableCell>
+        {!emptyTable && 
+        <>
+          <TableCell className='table-row-sublist-list-header-cell-icon' >
+            <IconButton onClick={() => deleteAction(row)}><Delete className='delete' /></IconButton>
+          </TableCell>
+          <TableCell className='table-row-sublist-list-header-cell-icon' >
+            <IconButton onClick={() => editAction(row)}><Edit className='edit' /></IconButton>
+          </TableCell>
+          {!!headerActions && <TableCell className='table-row-sublist-list-header-cell-icon' >{headerActions}</TableCell>}
+        </>
+        }
         {row.data.map(r => (
             <TableCell key={Math.random()} align="left">
               {
@@ -100,7 +108,9 @@ function Row({ row, withSubList, editAction, deleteAction }: RowProps) {
                       >
                         {subRow.map(x =>
                           typeof x !== 'boolean'
-                            ? <TableCell className='table-row-sublist-list-row-cell' key={Math.random()}>{x}</TableCell>
+                            ? <TableCell className='table-row-sublist-list-row-cell' key={Math.random()}>
+                                <span className='table-row-sublist-list-row-cell-content' >{x}</span>
+                              </TableCell>
                             : <TableCell className='table-row-sublist-list-row-cell' key={Math.random()}>
                             {
                               x ? <Check className='table-row-sublist-list-row-cell-content-icon' /> : <Clear className='table-row-sublist-list-row-cell-content-icon' />
@@ -124,7 +134,7 @@ function Row({ row, withSubList, editAction, deleteAction }: RowProps) {
   );
 }
 
-export default function Table({ headers, rows, editAction, deleteAction, className }: TableProps ) {
+export default function Table({ headers, rows, editAction, deleteAction, className, headerActions  }: TableProps ) {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [page, setPage] = React.useState(0);
   const haveSubList = rows.some(x => !!x.subList);
@@ -145,8 +155,13 @@ export default function Table({ headers, rows, editAction, deleteAction, classNa
           <TableHead >
             <TableRow >
               {haveSubList && <TableCell className='table-header' />}
-              <TableCell className='table-header' />
-              <TableCell className='table-header' />
+              {rows.length > 0 &&
+                <>
+                  <TableCell className='table-header' />
+                  <TableCell className='table-header' />
+                  {!!headerActions && <TableCell className='table-header' />}
+                </>
+              }
               {headers.map(x => 
                 <TableCell className='table-header' align="left" key={Math.random()}>
                   {<strong className='table-header-cell'>{x}</strong>}
@@ -162,14 +177,17 @@ export default function Table({ headers, rows, editAction, deleteAction, classNa
                   withSubList={haveSubList}
                   deleteAction={deleteAction}
                   editAction={editAction}
+                  headerActions={headerActions}
                 />
               ))
                 : 
               <Row
-                row={{ data: ["Nenhum dado encontrado"] }}
+                key={"table-empty"}
+                row={{ data: headers.map((x, index) => index === 0 ? "Nenhum dado encontrado" : "")}}
                 withSubList={false}
                 deleteAction={deleteAction}
                 editAction={editAction}
+                emptyTable
               />
             }
           </TableBody>

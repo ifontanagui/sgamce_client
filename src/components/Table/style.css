@@ -58,9 +58,14 @@
       } 
 
       .table-row-sublist-list-row {
-        .table-row-sublist-list-row-cell { 
+        .table-row-sublist-list-row-cell {           
+          max-width: 70vw;
           .table-row-sublist-list-row-cell-content { 
             border-bottom: none;
+            white-space: nowrap;
+            overflow: hidden; /* "overflow" value must be different from "visible" */
+            text-overflow: ellipsis;
+            display: block;
           }
 
           .table-row-sublist-list-row-cell-content-icon { 
