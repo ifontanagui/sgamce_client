@@ -17,8 +17,8 @@ export interface IRow {
 interface TableProps {
   headers: string[],
   rows: IRow[],
-  editAction(row: IRow): void,
-  deleteAction(row: IRow): void,
+  editAction?(row: IRow): void,
+  deleteAction?(row: IRow): void,
   className?: string
   headerActions?: React.ReactNode
 }
@@ -26,8 +26,8 @@ interface TableProps {
 interface RowProps {
   row: IRow;
   withSubList: boolean
-  editAction(row: IRow): void
-  deleteAction(row: IRow): void
+  editAction?(row: IRow): void
+  deleteAction?(row: IRow): void
   emptyTable?: boolean
   headerActions?: React.ReactNode
 }
@@ -54,12 +54,14 @@ function Row({ row, withSubList, editAction, deleteAction, emptyTable, headerAct
         }
         {!emptyTable && 
         <>
+          {deleteAction &&
           <TableCell className='table-row-sublist-list-header-cell-icon' >
             <IconButton onClick={() => deleteAction(row)}><Delete className='delete' /></IconButton>
-          </TableCell>
+          </TableCell>}
+          {editAction &&
           <TableCell className='table-row-sublist-list-header-cell-icon' >
             <IconButton onClick={() => editAction(row)}><Edit className='edit' /></IconButton>
-          </TableCell>
+          </TableCell>}
           {!!headerActions && <TableCell className='table-row-sublist-list-header-cell-icon' >{headerActions}</TableCell>}
         </>
         }
@@ -157,9 +159,9 @@ export default function Table({ headers, rows, editAction, deleteAction, classNa
               {haveSubList && <TableCell className='table-header' />}
               {rows.length > 0 &&
                 <>
-                  <TableCell className='table-header' />
-                  <TableCell className='table-header' />
-                  {!!headerActions && <TableCell className='table-header' />}
+                  {deleteAction && <TableCell className='table-header' />}
+                  {editAction && <TableCell className='table-header' />}
+                  {headerActions && <TableCell className='table-header' />}
                 </>
               }
               {headers.map(x => 
@@ -201,6 +203,7 @@ export default function Table({ headers, rows, editAction, deleteAction, classNa
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
+        style={{ overflow: "hidden" }}
       />
     </>
   );
