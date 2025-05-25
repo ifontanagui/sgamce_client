@@ -14,6 +14,8 @@ interface InputTextProps {
   required?: boolean
   type: "email" | "number" | "password" | "text"
   value: string;
+  multiline?: boolean
+  defaultRows?: number
   hiddenDefaultIcon?: boolean
   onChange: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>
 }
@@ -47,6 +49,8 @@ export default function InputText(props: InputTextProps) {
         value={props.value}
         onChange={props.onChange}
         variant="standard" 
+        multiline={props.multiline}
+        rows={props.multiline && props.defaultRows ? props.defaultRows : 1}
         slotProps={{
           input: {
             endAdornment: (
