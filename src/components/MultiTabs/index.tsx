@@ -2,7 +2,7 @@
 
 import "./style.css"
 import React from "react";
-import { AppBar, Tabs, Tab } from "@mui/material";
+import { Tabs, Tab } from "@mui/material";
 
 
 interface TabPanelProps {
@@ -55,23 +55,21 @@ export default function MultiTabs(props: MultiTabsProps) {
       key={`tab-${index}`}
       icon={tab.icon} 
       label={tab.header} 
-      className={`tab ${index === value && "selected"}`}
+      className="tab"
     />)
     tabsContent.push(<TabPanel value={value} index={index}>{tab.content}</TabPanel>)
   })
 
   return (
     <div className="multi-tabs">
-      <AppBar position="static">
-        <Tabs
-          className="tabs-header"
-          value={value}
-          onChange={handleChange}
-          variant="fullWidth"
-        >
-          {tabsHeader}
-        </Tabs>
-      </AppBar>
+      <Tabs
+        className="tabs-header"
+        value={value}
+        onChange={handleChange}
+        variant="fullWidth"
+      >
+        {tabsHeader}
+      </Tabs>
       <div className="tabs-content">
         {props.tabs.map((tab, index) => 
           <TabPanel key={index} value={value} index={index}>{tab.content}</TabPanel>
