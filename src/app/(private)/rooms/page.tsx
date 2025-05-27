@@ -98,7 +98,7 @@ export default function Rooms() {
       rows = rows.filter(x => x.data[0].toString().toLowerCase().includes(nameFilter.toLowerCase()));
     }
   
-    const handleAddUBuildClick = async() => {
+    const handleAddBuildClick = async() => {
       setNewlyOpened(false);
       
       if (!name) return false;
@@ -114,7 +114,7 @@ export default function Rooms() {
       return true;
     }
 
-    const handleAddURoomClick = async() => {
+    const handleAddRoomClick = async() => {
       setNewlyOpened(false);
       
       if (!name) return false;
@@ -179,91 +179,91 @@ export default function Rooms() {
               headerActions={headerActions(setOpenAddRoom)}
             />
           </div>
-            <Drawer
-              anchor='right'
-              open={openDrawer}
-              onClose={() => {
-                handleCloseAddBuild();
-                setOpenDrawer(false);
-              }}
-            >
-              <div className='room-drawer'>
-                <strong className='room-drawer-title'>Cadastrar Prédio</strong>
+          <Drawer
+            anchor='right'
+            open={openDrawer}
+            onClose={() => {
+              handleCloseAddBuild();
+              setOpenDrawer(false);
+            }}
+          >
+            <div className='room-drawer'>
+              <strong className='room-drawer-title'>Cadastrar Prédio</strong>
+              <InputText
+                type='text'
+                placeholder='Nome'
+                required
+                value={name}
+                className='room-data-input'
+                error={!newlyOpened && !name}
+                helperText='É obrigatório informar o nome da categoria'
+                onChange={(event) => { setName(event.target.value) }}
+              />
+              <InputText
+                type='text'
+                placeholder='Informações extras'
+                value={extraInfos}
+                className='room-data-input'
+                onChange={(event) => { setExtraInfos(event.target.value) }}
+                multiline
+                defaultRows={10}
+              />
+              <Button 
+                className="save-button"
+                onClick={async () => {
+                  const result = await handleAddBuildClick();
+                  if (result)
+                    setOpenDrawer(false);
+                }} 
+                textContent='Salvar'
+              />
+            </div>
+          </Drawer>
+          <Dialog
+            open={openAddRoom}
+            onClose={() => setOpenAddRoom(false)}
+            scroll='paper'
+            maxWidth={"xl"}
+            fullWidth
+          >
+            <div className='add-room-dialog'>
+              <div className="add-room-dialog-header">
+                <strong className="add-room-dialog-header-comp">Salas e Laboratórios do Prédio 1</strong>
+                <IconButton onClick={() => {setOpenAddRoomForm(!openAddRoomForm)}}>
+                  <AddCircleOutline className='add-room-dialog-header-comp' />
+                </IconButton>
+              </div>
+              <div className={`add-room-dialog-header-form-${openAddRoomForm ? "open" : "close"}`}>
                 <InputText
                   type='text'
-                  placeholder='Nome'
-                  required
+                  placeholder='Nome da Sala/Laboratório'
                   value={name}
-                  className='room-data-input'
+                  required
                   error={!newlyOpened && !name}
-                  helperText='É obrigatório informar o nome da categoria'
+                  helperText="É obrigatório informar o nome da sala/laboratório"
                   onChange={(event) => { setName(event.target.value) }}
                 />
-                <InputText
-                  type='text'
-                  placeholder='Informações extras'
-                  value={extraInfos}
-                  className='room-data-input'
-                  onChange={(event) => { setExtraInfos(event.target.value) }}
-                  multiline
-                  defaultRows={10}
-                />
+                
                 <Button 
-                  className="save-button"
+                  className="save-room-button"
                   onClick={async () => {
-                    const result = await handleAddUBuildClick();
+                    const result = await handleAddRoomClick();
                     if (result)
                       setOpenDrawer(false);
                   }} 
                   textContent='Salvar'
                 />
               </div>
-            </Drawer>
-            <Dialog
-              open={openAddRoom}
-              onClose={() => setOpenAddRoom(false)}
-              scroll='paper'
-              maxWidth={"xl"}
-              fullWidth
-            >
-              <div className='add-room-dialog'>
-                <div className="add-room-dialog-header">
-                  <strong className="add-room-dialog-header-comp">Salas e Laboratórios do Prédio 1</strong>
-                  <IconButton onClick={() => {setOpenAddRoomForm(!openAddRoomForm)}}>
-                    <AddCircleOutline className='add-room-dialog-header-comp' />
-                  </IconButton>
-                </div>
-                <div className={`add-room-dialog-header-form-${openAddRoomForm ? "open" : "close"}`}>
-                  <InputText
-                    type='text'
-                    placeholder='Nome da Sala/Laboratório'
-                    value={name}
-                    required
-                    error={!newlyOpened && !name}
-                    helperText="É obrigatório informar o nome da sala/laboratório"
-                    onChange={(event) => { setName(event.target.value) }}
-                  />
-                  
-                  <Button 
-                    className="save-room-button"
-                    onClick={async () => {
-                      const result = await handleAddURoomClick();
-                      if (result)
-                        setOpenDrawer(false);
-                    }} 
-                    textContent='Salvar'
-                  />
-                </div>
-                <div className={`add-room-dialog-content ${!openAddRoomForm ? "filled" : ""}`} >
-                  <Table
-                    headers={['Nome']}
-                    rows={rows[0].subList?.rows?.map(x => { return { data: x.map((v, i) => i === 0 ? v : null ).filter(x => !!x) } as IRow }) || []}
-                    className="rooms-table"
-                    deleteAction={handleDeleteRoomClick}
-                  />
-                </div>
+              <div className={`add-room-dialog-content ${!openAddRoomForm ? "filled" : ""}`} >
+                <Table
+                  headers={['Nome']}
+                  rows={rows[0].subList?.rows?.map(x => { return { data: x.map((v, i) => i === 0 ? v : null ).filter(x => !!x) } as IRow }) || []}
+                  className="rooms-table"
+                  deleteAction={handleDeleteRoomClick}
+                />
               </div>
-            </Dialog>
+            </div>
+          </Dialog>
         </div>
   )
 }
