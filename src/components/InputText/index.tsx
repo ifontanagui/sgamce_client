@@ -13,7 +13,7 @@ interface InputTextProps {
   placeholder: string;
   required?: boolean
   type: "email" | "number" | "password" | "text"
-  value: string;
+  value: string | number;
   multiline?: boolean
   defaultRows?: number
   hiddenDefaultIcon?: boolean
