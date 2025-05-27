@@ -1,0 +1,140 @@
+.equipments {
+  .equipments-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    .equipments-header-title {
+      color: var(--default-blue-color);
+      font-size: larger;
+    }
+  }
+  
+
+  .add-equipment-action {
+    width: 45px;
+    display: flex;
+    justify-content: center;
+
+    .add-equipment-action-icon {
+      color: var(--default-blue-color)
+    }
+  }
+}
+
+.equipments-filter-input {
+  width: 100% !important;
+}
+
+.equipments-filter-combo {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 0 5px;
+}
+
+.equipment-drawer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  height: 100%;
+
+
+  width: 50vw;
+  min-width: 200px;
+  height: 100%;
+  justify-content: space-between;
+  padding: 20px;
+
+  .equipment-drawer-title {
+    font-size: larger;
+    color: var(--default-blue-color)
+  }
+
+  .equipments-combo {
+    width: 97%;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    padding: 0 5px;
+    margin-left: 2.5%;
+  }
+
+  .analog-digital-radios {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+
+    .radio {
+      .css-1qiat4j {
+        color: var(--default-blue-color)
+      }
+    }
+  }
+
+  .equipment-data-input {
+    width: 100%;
+  }
+
+  .save-button {
+    width: 100%;
+    height: 50px;
+  }
+}
+
+.add-machine-dialog {
+  height: 80vh;
+  padding: 10px;
+  background-color: var(--off-white-color);
+  
+  .add-machine-dialog-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+    
+    .add-machine-dialog-header-comp {
+      color: var(--default-blue-color)
+    }
+  }
+  
+  .add-machine-dialog-header-form-open {
+    animation: fadeIn 0.3s forwards 0s 1 normal;
+    background-color: var(--off-white-color);
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+    border-bottom: 1px solid var(--soft-black-color);;
+    margin-bottom: 10px;
+    justify-content: flex-start;
+    padding: 0 10px 10px 10px;
+    align-items: center;
+    
+    .save-machine-button {
+      height: 50px;
+    }
+  }
+  
+  .add-machine-dialog-header-form-close {
+    animation: fadeOut 0.3s forwards 0s 1 normal;
+    background-color: var(--off-white-color);
+    height: 0px;
+    overflow: hidden;
+  }
+  
+  .add-machine-dialog-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    height: 80%;
+  }
+  
+  .filled {
+    height: 90%;
+  }
+}
