@@ -81,7 +81,7 @@ function Row({ row, withSubList, editAction, deleteAction, emptyTable, headerAct
       </TableRow>
       {withSubList &&
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={10}>
           <Collapse in={open} timeout="auto" unmountOnExit className='table-row-sublist' >
             <strong className='table-row-sublist-title'>
               {row.subList?.title}
