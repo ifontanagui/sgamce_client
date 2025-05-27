@@ -87,6 +87,7 @@
             margin: 0 5px 0 10px;
             color: var(--off-white-color);
             font-weight: 400;
+            white-space: nowrap;
           }
         }
 
@@ -109,8 +110,6 @@
     background-color: var(--off-white-color);
     overflow: auto;
     padding: 10px;
-    top: 120px;
-    position: absolute;
   }
 
   .private-layout-footer {
