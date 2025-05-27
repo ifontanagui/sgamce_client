@@ -1,0 +1,9 @@
+.combo {
+  margin-top: 20px;
+  width: 90%;
+  
+  .select {
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+}
