@@ -25,7 +25,7 @@ const OGRows = [
 ] as IRow[];
 let rows = OGRows;
 
-function headerActions(onClickAction:  React.Dispatch<React.SetStateAction<boolean>>) {
+function rowActions(onClickAction:  React.Dispatch<React.SetStateAction<boolean>>) {
   return (
     <div className="add-equipment-action">
       <IconButton onClick={() => onClickAction(true)}>
@@ -206,7 +206,7 @@ export default function Equipments() {
               className="equipments-table"
               deleteAction={handleDeleteEquipmentClick}
               editAction={handleEditEquipmentAction}
-              headerActions={headerActions(setOpenAddMachine)}
+              rowActions={rowActions(setOpenAddMachine)}
             />
           </div>
           <Drawer

@@ -40,7 +40,7 @@ const OGRows = [
 ] as IRow[];
 let rows = OGRows;
 
-function headerActions(onClickAction:  React.Dispatch<React.SetStateAction<boolean>>) {
+function rowActions(onClickAction:  React.Dispatch<React.SetStateAction<boolean>>) {
   return (
     <div className="add-room-action">
       <IconButton onClick={() => onClickAction(true)}>
@@ -176,7 +176,7 @@ export default function Rooms() {
               className="rooms-table"
               deleteAction={handleDeleteBuildClick}
               editAction={handleEditRoomAction}
-              headerActions={headerActions(setOpenAddRoom)}
+              rowActions={rowActions(setOpenAddRoom)}
             />
           </div>
           <Drawer

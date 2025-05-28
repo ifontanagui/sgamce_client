@@ -20,7 +20,7 @@ interface TableProps {
   editAction?(row: IRow): void,
   deleteAction?(row: IRow): void,
   className?: string
-  headerActions?: React.ReactNode
+  rowActions?: React.ReactNode
   rowClick?(row: IRow, index: number): void
 }
 
@@ -30,12 +30,12 @@ interface RowProps {
   editAction?(row: IRow): void
   deleteAction?(row: IRow): void
   emptyTable?: boolean
-  headerActions?: React.ReactNode
+  rowActions?: React.ReactNode
   rowClick?(row: IRow, index: number): void
   index?: number
 }
 
-function Row({ row, withSubList, editAction, deleteAction, emptyTable, headerActions, rowClick, index }: RowProps) {
+function Row({ row, withSubList, editAction, deleteAction, emptyTable, rowActions, rowClick, index }: RowProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -70,7 +70,7 @@ function Row({ row, withSubList, editAction, deleteAction, emptyTable, headerAct
           <TableCell className='table-row-sublist-list-header-cell-icon' >
             <IconButton onClick={() => editAction(row)}><Edit className='edit' /></IconButton>
           </TableCell>}
-          {!!headerActions && <TableCell className='table-row-sublist-list-header-cell-icon' >{headerActions}</TableCell>}
+          {!!rowActions && <TableCell className='table-row-sublist-list-header-cell-icon' >{rowActions}</TableCell>}
         </>
         }
         {row.data.map(r => (
@@ -144,7 +144,7 @@ function Row({ row, withSubList, editAction, deleteAction, emptyTable, headerAct
   );
 }
 
-export default function Table({ headers, rows, editAction, deleteAction, className, headerActions, rowClick }: TableProps ) {
+export default function Table({ headers, rows, editAction, deleteAction, className, rowActions, rowClick }: TableProps ) {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [page, setPage] = React.useState(0);
   const haveSubList = rows.some(x => !!x.subList);
@@ -169,7 +169,7 @@ export default function Table({ headers, rows, editAction, deleteAction, classNa
                 <>
                   {deleteAction && <TableCell className='table-header' />}
                   {editAction && <TableCell className='table-header' />}
-                  {headerActions && <TableCell className='table-header' />}
+                  {rowActions && <TableCell className='table-header' />}
                 </>
               }
               {headers.map(x => 
@@ -187,7 +187,7 @@ export default function Table({ headers, rows, editAction, deleteAction, classNa
                   withSubList={haveSubList}
                   deleteAction={deleteAction}
                   editAction={editAction}
-                  headerActions={headerActions}
+                  rowActions={rowActions}
                   rowClick={rowClick}
                   index={index}
                 />
