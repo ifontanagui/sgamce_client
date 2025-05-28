@@ -4,13 +4,13 @@ import React from "react";
 import "./style.css"
 import { useRouter } from 'next/navigation'
 import { IconButton, Menu, MenuItem } from "@mui/material";
-import { AccountCircle, Place, PrecisionManufacturing, KeyboardDoubleArrowDown, Category, DoorBack } from "@mui/icons-material";
+import { AccountCircle, Place, PrecisionManufacturing, KeyboardDoubleArrowDown, Category, Cable } from "@mui/icons-material";
 
 const menuItems = [
   { description: "Categorias", url: "/categories", icon: <Category className="private-layout-header-sub-menu-list-item-icon"/> },
   { description: "Equipamentos", url: "/equipments", icon: <PrecisionManufacturing className="private-layout-header-sub-menu-list-item-icon"/> },
   { description: "Salas e Laboratórios", url: "/rooms", icon: <Place className="private-layout-header-sub-menu-list-item-icon"/> },
-  { description: "Vincular Equipamentos à Salas", url: "/equipments-rooms", icon: <DoorBack className="private-layout-header-sub-menu-list-item-icon"/> },
+  { description: "Vincular Equipamentos à Salas", url: "/equipments-rooms", icon: <Cable className="private-layout-header-sub-menu-list-item-icon"/> },
 ] as const;
 
 
@@ -30,7 +30,6 @@ export default function PrivateLayout({
       <div className={`private-layout-screen-header`}>
         <div className={`private-layout-header`}>
           <IconButton onClick={() => setOpenMenu(!openMenu)} >
-            <strong className="private-layout-header-menu-text">MENU</strong>
             <KeyboardDoubleArrowDown className={`private-layout-header-menu-icon ${openMenu && "open"}`} />
           </IconButton>
           <strong className="private-layout-header-text" onClick={() => {router.push("/")}}>SGAMCE</strong>
