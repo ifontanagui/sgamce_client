@@ -21,6 +21,7 @@ interface TableProps {
   deleteAction?(row: IRow): void,
   className?: string
   headerActions?: React.ReactNode
+  rowClick?(row: IRow, index: number): void
 }
 
 interface RowProps {
@@ -30,16 +31,23 @@ interface RowProps {
   deleteAction?(row: IRow): void
   emptyTable?: boolean
   headerActions?: React.ReactNode
+  rowClick?(row: IRow, index: number): void
+  index?: number
 }
 
-function Row({ row, withSubList, editAction, deleteAction, emptyTable, headerActions }: RowProps) {
+function Row({ row, withSubList, editAction, deleteAction, emptyTable, headerActions, rowClick, index }: RowProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
     <>
       <TableRow 
         className={`table-row ${withSubList ? 'clickable' : 'not-clickable'}`} 
-        onClick={() => setOpen(!open)}
+        onClick={() => { 
+            if (rowClick) 
+              rowClick(row, index !== undefined ? index : -1); 
+            
+            setOpen(!open)
+          }}
       >
           {withSubList &&
           <TableCell className='table-row-sublist-list-header-cell-icon' >
@@ -136,7 +144,7 @@ function Row({ row, withSubList, editAction, deleteAction, emptyTable, headerAct
   );
 }
 
-export default function Table({ headers, rows, editAction, deleteAction, className, headerActions  }: TableProps ) {
+export default function Table({ headers, rows, editAction, deleteAction, className, headerActions, rowClick }: TableProps ) {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [page, setPage] = React.useState(0);
   const haveSubList = rows.some(x => !!x.subList);
@@ -172,7 +180,7 @@ export default function Table({ headers, rows, editAction, deleteAction, classNa
           </TableHead>
           <TableBody>
             {rows.length 
-              ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+              ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                 <Row
                   key={Math.random()}
                   row={row}
@@ -180,6 +188,8 @@ export default function Table({ headers, rows, editAction, deleteAction, classNa
                   deleteAction={deleteAction}
                   editAction={editAction}
                   headerActions={headerActions}
+                  rowClick={rowClick}
+                  index={index}
                 />
               ))
                 : 
@@ -187,8 +197,6 @@ export default function Table({ headers, rows, editAction, deleteAction, classNa
                 key={"table-empty"}
                 row={{ data: headers.map((x, index) => index === 0 ? "Nenhum dado encontrado" : "")}}
                 withSubList={false}
-                deleteAction={deleteAction}
-                editAction={editAction}
                 emptyTable
               />
             }
