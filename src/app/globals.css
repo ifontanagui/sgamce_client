@@ -9,6 +9,7 @@
   --soft-grey-color: #666; /*texts*/
   --default-grey-color: #333; /*texts*/
   --soft-black-color: #d0d0d0; /*divisors*/
+  --soft-gray-color: #f1f1f1; /*divisors*/
 }
 
 .main {

@@ -1,0 +1,51 @@
+.table-transfer {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .table-transfer-side {
+    height: 100%;
+    width: 40%;
+    
+    .table-transfer-table {
+      height: calc(100% - 100px);
+      width: 100%;
+      overflow: hidden;
+      border-radius: 20px;
+      border: 3px solid var(--default-blue-color);
+      
+      .table-transfer-table-list {
+        box-shadow: none;
+        overflow-y: auto;
+        height: 100%;
+
+        span {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+      
+    }
+
+    .table-transfer-filter {
+      width: 100%;
+    }
+  }
+
+  .table-transfer-button {
+    color: var(--off-white-color);
+    background-color: var(--default-blue-color);
+    border: 3px solid var(--default-blue-color);
+    margin: 10px 0;
+    transition: all 0.3s;
+  }
+
+  .table-transfer-button:hover {
+    border-width: 3px;
+    background-color: var(--soft-gray-color);
+    color: var(--default-blue-color);
+  }
+}
