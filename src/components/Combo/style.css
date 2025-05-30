@@ -6,4 +6,21 @@
     margin-left: 15px;
     margin-right: 15px;
   }
+
+  .select-error {
+    margin-left: 15px;
+    margin-right: 15px;
+
+    svg {
+      color: var(--default-red-color)
+    }
+  }
+  
+  .select-error::before, .select-error::after  {
+    border-bottom: 1px solid var(--default-red-color) !important;
+  }
+
+  .error {
+    color: var(--default-red-color) !important;
+  }
 }
