@@ -7,7 +7,7 @@
     display: flex;
     justify-content: center;
 
-    .add-equipment-action-icon {
+    .add-equipment-action-icon, .add-users-action-icon {
       color: var(--default-blue-color)
     }
   }
@@ -28,7 +28,7 @@
     }
 
     .room-tab-table {
-      height: 90%;
+      height: 100%;
       width: 100%;
       display: flex;
       flex-direction: column;
@@ -39,29 +39,6 @@
         height: 93%;
       }
     }
-  }
-}
-
-.equipment-drawer {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  height: 100%;
-  width: 70vw;
-  min-width: 200px;
-  height: 100%;
-  justify-content: space-between;
-  padding: 20px;
-
-  .equipment-drawer-title {
-    font-size: larger;
-    color: var(--default-blue-color)
-  }
-
-  .equipment-drawer-transfer-list {
-    height: 95%;
-    width: 100%;
   }
 }
 
@@ -111,6 +88,65 @@
   }
   
   .add-machine-dialog-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    height: 80%;
+  }
+  
+  .filled {
+    height: 90%;
+  }
+}
+
+.add-user-dialog {
+  height: 80vh;
+  padding: 10px;
+  background-color: var(--off-white-color);
+  
+  .add-user-dialog-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+    
+    .add-user-dialog-header-comp {
+      color: var(--default-blue-color)
+    }
+  }
+  
+  .add-user-dialog-header-form-open {
+    animation: fadeIn 0.3s forwards 0s 1 normal;
+    background-color: var(--off-white-color);
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+    border-bottom: 1px solid var(--soft-black-color);;
+    margin-bottom: 10px;
+    justify-content: space-between;
+    padding: 0 10px 10px 10px;
+    align-items: center;
+    
+    .equipments-combo {
+      width: 90%;
+      margin-top: 10px;
+    }
+
+    .save-user-button {
+      height: 50px;
+      width: 10%;
+    }
+  }
+  
+  .add-user-dialog-header-form-close {
+    animation: fadeOut 0.3s forwards 0s 1 normal;
+    background-color: var(--off-white-color);
+    height: 0px;
+    overflow: hidden;
+  }
+  
+  .add-user-dialog-content {
     display: flex;
     align-items: center;
     justify-content: flex-start;

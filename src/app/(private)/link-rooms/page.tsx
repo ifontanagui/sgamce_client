@@ -5,7 +5,7 @@ import React from "react";
 import MultiTabs from "@/components/MultiTabs"
 import Table, { IRow } from "@/components/Table";
 import { Chip, Dialog, IconButton } from "@mui/material";
-import { AddCircleOutline, AddToQueue } from "@mui/icons-material";
+import { AddCircleOutline, AddToQueue, GroupAdd } from "@mui/icons-material";
 import InputText from "@/components/InputText";
 import Button from "@/components/Button";
 import Combo from "@/components/Combo";
@@ -76,11 +76,35 @@ const Builds = [
   { data: ['Bloco 14'] },
 ] as IRow[]
 
-function rowActions(onClickAction:  React.Dispatch<React.SetStateAction<boolean>>) {
+const OGUsers = [
+  { data: ['Usuário 01', 'usuqrio01@email.com']},
+  { data: ['Usuário 02', 'usuqrio02@email.com'] },
+  { data: ['Usuário 03', 'usuqrio03@email.com'] },
+  { data: ['Usuário 04', 'usuqrio04@email.com'] },
+  { data: ['Usuário 05', 'usuqrio05@email.com'] },
+  { data: ['Usuário 06', 'usuqrio06@email.com'] },
+  { data: ['Usuário 07', 'usuqrio07@email.com'] },
+  { data: ['Usuário 08', 'usuqrio08@email.com'] },
+  { data: ['Usuário 09', 'usuqrio09@email.com'] },
+  { data: ['Usuário 10', 'usuqrio10@email.com'] },
+  { data: ['Usuário 11', 'usuqrio11@email.com'] },
+  { data: ['Usuário 12', 'usuqrio12@email.com'] },
+  { data: ['Usuário 13', 'usuqrio13@email.com'] },
+  { data: ['Usuário 14', 'usuqrio14@email.com'] },
+] as IRow[]
+let users = OGUsers;
+
+function rowActions(
+  onClickActionEquipment:  React.Dispatch<React.SetStateAction<boolean>>,
+  onClickActionUser:  React.Dispatch<React.SetStateAction<boolean>>
+) {
   return (
     <div className="add-equipment-action">
-      <IconButton onClick={() => onClickAction(true)}>
+      <IconButton onClick={() => onClickActionEquipment(true)}>
         <AddToQueue className="add-equipment-action-icon"/>
+      </IconButton>
+      <IconButton onClick={() => onClickActionUser(true)}>
+        <GroupAdd className="add-users-action-icon"/>
       </IconButton>
     </div>
   )
@@ -97,6 +121,8 @@ export default function Rooms() {
   const [assetNumber, setAssetNumber] = React.useState(0);
   const [identifierNumber, setIdentifierNumber] = React.useState(0);
   const [equipment, setEquipment] = React.useState("")
+  const [openAddUser, setOpenAddUser] = React.useState(false);
+  const [openAddUserForm, setOpenAddUserForm] = React.useState(false);
 
     
   React.useEffect(() => {
@@ -111,7 +137,7 @@ export default function Rooms() {
   const handleAddMachineClick = async() => {
     setNewlyOpened(false);
     
-    if (!assetNumber || !identifierNumber) return false;
+    if (!assetNumber || !identifierNumber || !equipment) return false;
 
     if ((rows[curBuildRow]?.row)[curRoomRow]?.subList?.rows)
       rows[curBuildRow].row[curRoomRow].subList.rows.push([equipment, assetNumber, identifierNumber])
@@ -132,6 +158,23 @@ export default function Rooms() {
     if ((rows[curBuildRow]?.row)[curRoomRow]?.subList?.rows)
       rows[curBuildRow].row[curRoomRow].subList.rows = rows[curBuildRow].row[curRoomRow].subList.rows.filter(r => r[1] !== row.data[1])
 
+    setReload(true);
+  }
+
+  const handleAddUserClick = async() => {
+    setNewlyOpened(false);
+    
+    if (!equipment) return false;
+
+    users.push({data: [equipment]})
+    
+    handleCloseAddEquipment();
+
+    return true;
+  }
+
+  const handleDeleteUserClick = (row: IRow) => {
+    users = users.filter(x => x.data[1] !== row.data[1]);
     setReload(true);
   }
 
@@ -164,7 +207,7 @@ export default function Rooms() {
                 rows={rows[curBuildRow]?.row || [] as IRow[]}
                 className="rooms-table"
                 rowClick={(row: IRow, index: number) => {setCurRoomRow(index)}}
-                rowActions={rowActions(setOpenAddMachine)}
+                rowActions={rowActions(setOpenAddMachine, setOpenAddUser)}
               />
             </div>
           </div>
@@ -229,6 +272,51 @@ export default function Rooms() {
               rows={(rows[curBuildRow]?.row)[curRoomRow]?.subList?.rows?.map(x => { return { data: x.map((v) => v ) } as IRow }) || []}
               className="machines-table"
               deleteAction={handleDeleteMachineClick}
+            />
+          </div>
+        </div>
+      </Dialog>
+      <Dialog
+        open={openAddUser}
+        onClose={() => setOpenAddUser(false)}
+        scroll='paper'
+        maxWidth={"xl"}
+        fullWidth
+      >
+        <div className='add-user-dialog'>
+          <div className="add-user-dialog-header">
+            <strong className="add-user-dialog-header-comp">Vincular Usuários</strong>
+            <IconButton onClick={() => {setOpenAddUserForm(!openAddUserForm)}}>
+              <AddCircleOutline className='add-user-dialog-header-comp' />
+            </IconButton>
+          </div>
+          <div className={`add-user-dialog-header-form-${openAddUserForm ? "open" : "close"}`}>
+            <div className='equipments-combo'>
+              <Combo 
+                title="Usuários" 
+                value={equipment}
+                onChange={(value: string | number) => setEquipment(value.toString())}
+                valuesList={[{description: "Fulano", value: "Fulano"}, {description: "Ciclano", value: "Ciclano"}, {description: "Beltrano", value: "Beltrano"}]}
+                emptyValue 
+                required
+                error={!newlyOpened && !equipment}
+                helperText="É obrigatório informar o usuário"
+              />
+            </div>             
+            <Button 
+              className="save-user-button"
+              onClick={async () => {
+                await handleAddUserClick();
+              }} 
+              textContent='Salvar'
+            />
+          </div>
+          <div className={`add-user-dialog-content ${!openAddUserForm ? "filled" : ""}`} >
+            <Table
+              headers={['Nome', "Email"]}
+              rows={users}
+              className="user-table"
+              deleteAction={handleDeleteUserClick}
             />
           </div>
         </div>
