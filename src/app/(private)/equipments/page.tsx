@@ -7,12 +7,11 @@ import DefaultSkeleton from "@/components/DefaultSkeleton";
 import Table, { IRow } from "@/components/Table";
 import InputText from "@/components/InputText";
 import Combo from "@/components/Combo";
-import { Dialog, Drawer, FormControlLabel, IconButton, Radio, RadioGroup } from "@mui/material";
+import { Drawer, FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import Button from "@/components/Button";
-import { AddCircleOutline, AddToQueue } from "@mui/icons-material";
 
 const OGRows = [
-  { data: ['Maquina 01', "Computador", "Dell", "0", "12"], subList: { title: "Máquinas", headers: [ "Nro. Identificação", "Nro. Identificação" ], rows: [[123, 123], [456, 456], [789, 789], [987, 987], [654, 654], [321, 321]] } },
+  { data: ['Maquina 01', "Computador", "Dell", "0", "12"] },
   { data: ['Vidraria 01', "Vidraria", "Dell", "12", "0"] },
   { data: ['Maquina 02', "Computador", "Dell", "0", "12"] },
   { data: ['Vidraria 02', "Vidraria", "Dell", "12", "0"] },
@@ -24,16 +23,6 @@ const OGRows = [
   { data: ['Vidraria 05', "Vidraria", "Dell", "12", "0"] },
 ] as IRow[];
 let rows = OGRows;
-
-function rowActions(onClickAction:  React.Dispatch<React.SetStateAction<boolean>>) {
-  return (
-    <div className="add-equipment-action">
-      <IconButton onClick={() => onClickAction(true)}>
-        <AddToQueue className="add-equipment-action-icon"/>
-      </IconButton>
-    </div>
-  )
-}
 
 function FilterDialog(props: {
   nameFilter: string, 
@@ -87,8 +76,6 @@ export default function Equipments() {
   const [categoryFilter, setCategoryFilter] = React.useState("");
   const [openDrawer, setOpenDrawer] = React.useState(false);
   const [newlyOpened, setNewlyOpened] = React.useState(true);
-  const [openAddMachine, setOpenAddMachine] = React.useState(false);
-  const [openAddMachineForm, setOpenAddMachineForm] = React.useState(false);
   const [isEdit, setIsEdit] = React.useState(false);
   
 
@@ -137,20 +124,6 @@ export default function Equipments() {
 
     return true;
   } 
-
-  const handleAddMachineClick = async() => {
-    setNewlyOpened(false);
-    
-    if (!calibrationFrequency || !maintenanceFrequency) return false;
-
-    if (rows[0].subList?.rows)
-      rows[0].subList.rows.push([calibrationFrequency, maintenanceFrequency])
-    
-    setIsEdit(false);
-    handleCloseAddEquipment();
-
-    return true;
-  }
   
   const handleCloseAddEquipment = () => {   
     setName("");
@@ -178,13 +151,6 @@ export default function Equipments() {
     setMaintenanceFrequency(Number.parseInt(row.data[4].toString()));
     setOpenDrawer(true);
   }
-    
-  const handleDeleteMachineClick = (row: IRow) => {
-    if (rows[0].subList?.rows)
-      rows[0].subList.rows = rows[0].subList.rows.filter(r => r[0] !== row.data[0])
-
-    setReload(true);
-  }
 
   return (
     reload
@@ -206,7 +172,6 @@ export default function Equipments() {
               className="equipments-table"
               deleteAction={handleDeleteEquipmentClick}
               editAction={handleEditEquipmentAction}
-              rowActions={rowActions(setOpenAddMachine)}
             />
           </div>
           <Drawer
@@ -313,59 +278,6 @@ export default function Equipments() {
               />
             </div>
           </Drawer>
-          <Dialog
-            open={openAddMachine}
-            onClose={() => setOpenAddMachine(false)}
-            scroll='paper'
-            maxWidth={"xl"}
-            fullWidth
-          >
-            <div className='add-machine-dialog'>
-              <div className="add-machine-dialog-header">
-                <strong className="add-machine-dialog-header-comp">Salas e Laboratórios do Prédio 1</strong>
-                <IconButton onClick={() => {setOpenAddMachineForm(!openAddMachineForm)}}>
-                  <AddCircleOutline className='add-machine-dialog-header-comp' />
-                </IconButton>
-              </div>
-              <div className={`add-machine-dialog-header-form-${openAddMachineForm ? "open" : "close"}`}>
-                <InputText
-                  type='text'
-                  placeholder='Nro. de Identificação'
-                  value={calibrationFrequency}
-                  required
-                  error={!newlyOpened && !calibrationFrequency}
-                  helperText="É obrigatório informar o nro. de identificação"
-                  onChange={(event) => { setCalibrationFrequency(Number.parseInt(event.target.value)) }}
-                />
-                <InputText
-                  type='text'
-                  placeholder='Nro. de Patrimonio'
-                  value={maintenanceFrequency}
-                  required
-                  error={!newlyOpened && !maintenanceFrequency}
-                  helperText="É obrigatório informar o nro. de patrimonio"
-                  onChange={(event) => { setMaintenanceFrequency(Number.parseInt(event.target.value)) }}
-                />                
-                <Button 
-                  className="save-machine-button"
-                  onClick={async () => {
-                    const result = await handleAddMachineClick();
-                    if (result)
-                      setOpenDrawer(false);
-                  }} 
-                  textContent='Salvar'
-                />
-              </div>
-              <div className={`add-machine-dialog-content ${!openAddMachineForm ? "filled" : ""}`} >
-                <Table
-                  headers={['Nro. Identificação', 'Nro Patrimonio']}
-                  rows={rows[0].subList?.rows?.map(x => { return { data: x.map((v) => v ) } as IRow }) || []}
-                  className="machines-table"
-                  deleteAction={handleDeleteMachineClick}
-                />
-              </div>
-            </div>
-          </Dialog>
         </div>
   );
 }
