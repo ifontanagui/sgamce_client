@@ -5,6 +5,7 @@ import "./style.css"
 import { useRouter } from 'next/navigation'
 import { IconButton, Menu, MenuItem } from "@mui/material";
 import { AccountCircle, Place, PrecisionManufacturing, KeyboardDoubleArrowDown, Category, Cable } from "@mui/icons-material";
+import { deleteCookie } from "cookies-next";
 
 const menuItems = [
   { description: "Categorias", url: "/categories", icon: <Category className="private-layout-header-sub-menu-list-item-icon"/> },
@@ -47,7 +48,12 @@ export default function PrivateLayout({
               onClose={() => setAnchorUserMenu(null)}
             >
               <MenuItem onClick={() => {router.push("/users")}}>Gerenciar Usuários</MenuItem>
-              <MenuItem onClick={() => {router.push("/sign-in")}}>Sair</MenuItem>
+              <MenuItem onClick={() => {
+                deleteCookie('token')
+                deleteCookie('payload')
+                
+                router.push("/sign-in")
+              }}>Sair</MenuItem>
             </Menu>
           </div>
         </div>

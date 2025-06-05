@@ -12,7 +12,7 @@ interface LoginReply {
 }
 
 export async function Login(email: string, password: string): Promise<LoginReply> {
-  const { data } = await axios.post(`${process.env.DB_HOST}/login`, {
+  const { data } = await axios.post(`http://127.0.0.1:8000/api/login`, {
     email,
     senha: password
   },
