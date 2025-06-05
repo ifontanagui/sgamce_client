@@ -5,7 +5,7 @@ import "./style.css"
 import { useRouter } from 'next/navigation'
 import { IconButton, Menu, MenuItem } from "@mui/material";
 import { AccountCircle, Place, PrecisionManufacturing, KeyboardDoubleArrowDown, Category, Cable } from "@mui/icons-material";
-import { deleteCookie } from "cookies-next";
+import { deleteCookie, getCookie } from "cookies-next";
 
 const menuItems = [
   { description: "Categorias", url: "/categories", icon: <Category className="private-layout-header-sub-menu-list-item-icon"/> },
@@ -21,6 +21,8 @@ export default function PrivateLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const payload = JSON.parse(getCookie('payload')?.toString() || "{}");
+  
   const router = useRouter();
   const [openMenu, setOpenMenu] = React.useState(true);
   const [openUserMenu, setOpenUserMenu] = React.useState(false);
@@ -47,7 +49,7 @@ export default function PrivateLayout({
               open={!!anchorUserMenu}
               onClose={() => setAnchorUserMenu(null)}
             >
-              <MenuItem onClick={() => {router.push("/users")}}>Gerenciar Usuários</MenuItem>
+              {!!payload.admin && <MenuItem onClick={() => {router.push("/users")}}>Gerenciar Usuários</MenuItem>}
               <MenuItem onClick={() => {
                 deleteCookie('token')
                 deleteCookie('payload')
