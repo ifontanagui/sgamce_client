@@ -5,12 +5,15 @@ import React from "react";
 import { useRouter } from 'next/navigation'
 import InputText from "@/components/InputText"
 import Button from "@/components/Button";
+import { Login as LoginFunction } from "@/services/auth-service";
+import { toast, ToastContainer } from "react-toastify";
+import { deleteCookie, setCookie } from "cookies-next";
 
 export default function Login() {
   const router = useRouter();
   
   const [loading, setLoading] = React.useState(false);
-  const [email, setEmail] = React.useState("");
+  const [email, setEmail] = React.useState("mdt@email.com");
   const [emailError, setEmailError] = React.useState(false);
   const [password, setPassword] = React.useState("");
   const [passwordError, setPasswordError] = React.useState(false);
@@ -27,9 +30,22 @@ export default function Login() {
     }
 
     setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-    //add Cookies
-    router.push("/");
+    const response = await LoginFunction(email, password);
+
+    if (response.success) {
+      deleteCookie('token')
+      setCookie('token', response.token);
+      deleteCookie('payload')
+      setCookie('payload', JSON.stringify(response.payload));
+      
+      console.log(JSON.stringify(response.payload));
+      
+      router.push("/");
+    }
+    else {
+      toast.error(response.message || "Erro ao fazer login, tente novamente");
+      setLoading(false);
+    }
   };
 
   return (
@@ -79,6 +95,19 @@ export default function Login() {
           </div>
         </div>
       </div>
+
+      <ToastContainer
+        position="bottom-left"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable={false}
+        pauseOnHover
+        theme="colored"
+      />
     </div>
   );
 }
