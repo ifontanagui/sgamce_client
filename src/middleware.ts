@@ -10,10 +10,10 @@ const REDIRECT_WHEN_NOT_AUTHENTICATE_ROUTE = '/sign-in';
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const publicRoute = publicRoutes.find(route => route.path === path )
-  const authToken = request.cookies.get('token')
+  const token = request.cookies.get('token')
+  const authToken = token?.value
   
   if (!authToken && publicRoute) {
-   console.log(1);
     return NextResponse.next();
   }
 
@@ -26,7 +26,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
   
-  if (authToken && publicRoute && publicRoute.whenAuthenticated === 'redirect') {
+  if (authToken && publicRoute && publicRoute?.whenAuthenticated === 'redirect') {
     const redirectUrl = request.nextUrl.clone();
     
     redirectUrl.pathname = '/';
