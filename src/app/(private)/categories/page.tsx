@@ -8,7 +8,7 @@ import DefaultActions from "@/components/DefaultActions";
 import InputText from "@/components/InputText";
 import Button from "@/components/Button";
 import { Drawer } from "@mui/material";
-import { CreateCategory, EditCategory, FindCategoriesRows } from "@/services/categories-service";
+import { CategoryData, CreateCategory, EditCategory, FindCategoriesRows } from "@/services/categories-service";
 import Toast, { DispatchToast, DispatchToastProps } from "@/components/Toast";
 
 function FilterDialog(props: {
@@ -30,7 +30,7 @@ function FilterDialog(props: {
 
 export default function Categories() {
   const [rows, setRows] = React.useState([] as IRow[]);
-  const [OGrows, setOGRows] = React.useState([] as IRow[]);
+  const [data, setData] = React.useState([] as CategoryData[]);
 
   const [reload, setReload] = React.useState(true);
   const [nameFilter, setNameFilter] = React.useState("");
@@ -45,8 +45,8 @@ export default function Categories() {
     if (reload) {
       (async () => {
         const categoriesRowsReply = await FindCategoriesRows();
-        setOGRows(categoriesRowsReply.data);
-        setRows(categoriesRowsReply.data);
+        setData(categoriesRowsReply.data);
+        setRows(categoriesRowsReply.data.map(x =>{ return {data: [x.id, x.nome]} as IRow}));
 
         if (!categoriesRowsReply.success) {
           setToastMessage({ type: "error", message: "Ocorreu um erro ao buscar as categorias, tente novamente" })
@@ -64,8 +64,8 @@ export default function Categories() {
 
   const handleFilterClick = async () => {
     const categoriesRows = !nameFilter
-      ? OGrows
-      : OGrows.filter(x => x.data[1].toString().toLowerCase().includes(nameFilter.toLowerCase()));
+      ? data.map(x =>{ return {data: [x.id, x.nome]} as IRow})
+      : data.filter(x => x.nome.toString().toLowerCase().includes(nameFilter.toLowerCase())).map(x =>{ return {data: [x.id, x.nome]} as IRow});
 
     setRows(categoriesRows);   
   }

@@ -1,21 +1,22 @@
-import { IRow } from "@/components/Table";
-import { BaseGetRowsReply, BaseGetRowsRequest, BasePostReply, BasePostRequest } from "./base-servcice";
+import {  BaseGetRowsRequest, BasePostReply, BasePostRequest } from "./base-service";
 
-export async function FindCategoriesRows(): Promise<BaseGetRowsReply> {
+export interface CategoryData {
+  id: number,
+  nome: string
+}
+interface FindCategoriesRowsReply {
+  success: boolean,
+  data: CategoryData[]
+}
+
+export async function FindCategoriesRows(): Promise<FindCategoriesRowsReply> {
   const reply = await BaseGetRowsRequest('/categorias');
-  console.log('reply: ', reply);
 
   if (!reply.success) return reply;
-  
-  const data = reply.data.map((x: { id: number, nome: string }) => {
-    return {
-      data: [x.id, x.nome]
-    } as IRow
-  })
 
   return {
     success: true,
-    data
+    data: reply.data as CategoryData[]
   }
 } 
 
