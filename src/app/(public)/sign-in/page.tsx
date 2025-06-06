@@ -6,8 +6,9 @@ import { useRouter } from 'next/navigation'
 import InputText from "@/components/InputText"
 import Button from "@/components/Button";
 import { Login as LoginFunction } from "@/services/auth-service";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { deleteCookie, setCookie } from "cookies-next";
+import Toast, { DispatchToast } from "@/components/Toast";
 
 export default function Login() {
   const router = useRouter();
@@ -38,12 +39,10 @@ export default function Login() {
       deleteCookie('payload')
       setCookie('payload', JSON.stringify(response.payload));
       
-      console.log(JSON.stringify(response.payload));
-      
       router.push("/");
     }
     else {
-      toast.error(response.message || "Erro ao fazer login, tente novamente");
+      DispatchToast({type: "error", message: response.message || "Erro ao fazer login, tente novamente"});
       setLoading(false);
     }
   };
@@ -96,18 +95,7 @@ export default function Login() {
         </div>
       </div>
 
-      <ToastContainer
-        position="bottom-left"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss={false}
-        draggable={false}
-        pauseOnHover
-        theme="colored"
-      />
+      <Toast />
     </div>
   );
 }

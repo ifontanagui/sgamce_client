@@ -9,6 +9,7 @@ import InputText from "@/components/InputText";
 import Button from "@/components/Button";
 import { Drawer } from "@mui/material";
 import { CreateCategory, EditCategory, FindCategoriesRows } from "@/services/categories-service";
+import Toast, { DispatchToast, DispatchToastProps } from "@/components/Toast";
 
 function FilterDialog(props: {
   nameFilter: string, 
@@ -38,18 +39,28 @@ export default function Categories() {
   const [newlyOpened, setNewlyOpened] = React.useState(true);
   const [openDrawer, setOpenDrawer] = React.useState(false);
   const [isEdit, setIsEdit] = React.useState(false);
+  const [toastMessage, setToastMessage] = React.useState({type: "success", message: ""} as DispatchToastProps);
   
   React.useEffect(() => {
     if (reload) {
       (async () => {
-        const categoriesRows = await FindCategoriesRows();
-        setOGRows(categoriesRows);
-        setRows(categoriesRows);
+        const categoriesRowsReply = await FindCategoriesRows();
+        setOGRows(categoriesRowsReply.data);
+        setRows(categoriesRowsReply.data);
+
+        if (!categoriesRowsReply.success) {
+          setToastMessage({ type: "error", message: "Ocorreu um erro ao buscar as categorias, tente novamente" })
+        }
 
         setReload(false);
       })().catch(console.error);
     }
   }, [reload]);
+
+  React.useEffect(() => {
+    console.log('toastMessage: ', toastMessage);
+    DispatchToast(toastMessage);
+  }, [toastMessage])
 
   const handleFilterClick = async () => {
     const categoriesRows = !nameFilter
@@ -65,17 +76,36 @@ export default function Categories() {
     if (!name) return false;
 
     if (isEdit){
-      await EditCategory(id, name)
+      const response = await EditCategory(id, name);
+      console.log('response: ', response);
+      if (response.success) {
+        setReload(true);
+        setIsEdit(false);
+        handleCloseAddCategory();
+
+        setToastMessage({type: "success", message:  "Categoria editada com sucesso!"})
+      }
+      else {
+        setToastMessage({type: "error", message:  response.message || "Erro ao editar a categoria, tente novamente"});
+      }
+
+      return response.success;
     }
     else {
-      await CreateCategory(name);
-    }
-    
-    setReload(true);
-    setIsEdit(false);
-    handleCloseAddCategory();
+      const response = await CreateCategory(name);
+      if (response.success) {
+        setReload(true);
+        setIsEdit(false);
+        handleCloseAddCategory();
 
-    return true;
+        setToastMessage({type: "success", message:  "Categoria criada com sucesso"});
+      }
+      else {
+        setToastMessage({type: "error", message:  response.message || "Erro ao cadastrar a categoria, tente novamente"});
+      }
+
+      return response.success;
+    }
   }
 
   const handleRefreshUCategoryClick = async() => {
@@ -102,6 +132,7 @@ export default function Categories() {
     setId(Number.parseInt(row.data[0].toString()));
     setName(row.data[1].toString());
     setOpenDrawer(true);
+    setIsEdit(true)
   }
 
   const handleAddButtonClick = () => {
@@ -159,6 +190,7 @@ export default function Categories() {
                 />
               </div>
             </Drawer>
+            <Toast />
           </div>
   )
 }

@@ -1,50 +1,28 @@
 import { IRow } from "@/components/Table";
-import axios from "axios";
-import { getCookie } from "cookies-next";
+import { BaseGetRowsReply, BaseGetRowsRequest, BasePostReply, BasePostRequest } from "./base-servcice";
 
-export async function FindCategoriesRows(): Promise<IRow[]> {
-  const token = getCookie('token');
-  const { data } = await axios.get(`http://127.0.0.1:8000/api/categorias`,
-  {
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    withCredentials: true
-  });
+export async function FindCategoriesRows(): Promise<BaseGetRowsReply> {
+  const reply = await BaseGetRowsRequest('/categorias');
+  console.log('reply: ', reply);
+
+  if (!reply.success) return reply;
   
-  return data.DATA.map((x: { id: number, nome: string }) => {
+  const data = reply.data.map((x: { id: number, nome: string }) => {
     return {
       data: [x.id, x.nome]
     } as IRow
   })
+
+  return {
+    success: true,
+    data
+  }
 } 
 
-export async function CreateCategory(nome: string) {
-  const token = getCookie('token');
-  await axios.post(`http://127.0.0.1:8000/api/categoria`, {
-    nome
-  },
-  {
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    withCredentials: true
-  });
+export async function CreateCategory(nome: string): Promise<BasePostReply> {
+  return BasePostRequest('/categoria', { nome })
 }
 
-export async function EditCategory(id: number, nome: string) {
-  const token = getCookie('token');
-  await axios.post(`http://127.0.0.1:8000/api/categoria/atualizar`, {
-    id,
-    nome
-  },
-  {
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    withCredentials: true
-  });
+export async function EditCategory(id: number, nome: string): Promise<BasePostReply> {
+  return BasePostRequest('/categoria/atualizar', { id, nome })
 }
