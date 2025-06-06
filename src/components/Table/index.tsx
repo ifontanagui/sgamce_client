@@ -182,7 +182,7 @@ export default function Table({ headers, rows, editAction, deleteAction, classNa
             {rows.length 
               ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                 <Row
-                  key={Math.random()}
+                  key={index}
                   row={row}
                   withSubList={haveSubList}
                   deleteAction={deleteAction}

@@ -8,22 +8,7 @@ import DefaultActions from "@/components/DefaultActions";
 import InputText from "@/components/InputText";
 import Button from "@/components/Button";
 import { Drawer } from "@mui/material";
-
-
-const OGRows = [
-  { data: ["Categoria 00"] },
-  { data: ["Categoria 01"] },
-  { data: ["Categoria 02"] },
-  { data: ["Categoria 03"] },
-  { data: ["Categoria 04"] },
-  { data: ["Categoria 05"] },
-  { data: ["Categoria 06"] },
-  { data: ["Categoria 07"] },
-  { data: ["Categoria 08"] },
-  { data: ["Categoria 09"] },
-  { data: ["Categoria 10"] },
-] as IRow[];
-let rows = OGRows;
+import { CreateCategory, EditCategory, FindCategoriesRows } from "@/services/categories-service";
 
 function FilterDialog(props: {
   nameFilter: string, 
@@ -42,31 +27,36 @@ function FilterDialog(props: {
   )
 }
 
-
 export default function Categories() {
+  const [rows, setRows] = React.useState([] as IRow[]);
+  const [OGrows, setOGRows] = React.useState([] as IRow[]);
+
   const [reload, setReload] = React.useState(true);
   const [nameFilter, setNameFilter] = React.useState("");
+  const [id, setId] = React.useState(0);
   const [name, setName] = React.useState("");
   const [newlyOpened, setNewlyOpened] = React.useState(true);
   const [openDrawer, setOpenDrawer] = React.useState(false);
   const [isEdit, setIsEdit] = React.useState(false);
   
   React.useEffect(() => {
-  if (reload) {
-    (async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setReload(false);
-    })().catch(console.error);
-  }
-}, [reload]);
+    if (reload) {
+      (async () => {
+        const categoriesRows = await FindCategoriesRows();
+        setOGRows(categoriesRows);
+        setRows(categoriesRows);
+
+        setReload(false);
+      })().catch(console.error);
+    }
+  }, [reload]);
 
   const handleFilterClick = async () => {
-    rows = OGRows;
-    setReload(!reload);
+    const categoriesRows = !nameFilter
+      ? OGrows
+      : OGrows.filter(x => x.data[1].toString().toLowerCase().includes(nameFilter.toLowerCase()));
 
-    if (!nameFilter) return;
-
-    rows = rows.filter(x => x.data[0].toString().toLowerCase().includes(nameFilter.toLowerCase()));
+    setRows(categoriesRows);   
   }
 
   const handleAddUCategoryClick = async() => {
@@ -74,16 +64,27 @@ export default function Categories() {
     
     if (!name) return false;
 
-    if (!isEdit)
-      rows.push({
-        data: [ name ]
-      })
+    if (isEdit){
+      await EditCategory(id, name)
+    }
+    else {
+      await CreateCategory(name);
+    }
     
+    setReload(true);
     setIsEdit(false);
     handleCloseAddCategory();
 
     return true;
   }
+
+  const handleRefreshUCategoryClick = async() => {
+    setNameFilter("");
+    setReload(true);
+
+    return true;
+  }
+  
 
   const handleCloseAddCategory = () => {   
     setName("");
@@ -91,13 +92,15 @@ export default function Categories() {
   }
 
   const handleDeleteCategoryClick = (row: IRow) => {
-    rows = rows.filter(r => r.data[0] !== row.data[0])
+    const categoriesRows = rows.filter(r => r.data[0] !== row.data[0])
+    setRows(categoriesRows);
 
     setReload(true);
   }
 
   const handleEditCategoryAction = (row: IRow) => {
-    setName(row.data[0].toString());
+    setId(Number.parseInt(row.data[0].toString()));
+    setName(row.data[1].toString());
     setOpenDrawer(true);
   }
 
@@ -112,14 +115,14 @@ export default function Categories() {
             <div className="categories-header">
               <strong className='categories-header-title'>Categorias</strong>
               <DefaultActions
-                refreshAction={handleFilterClick}
+                refreshAction={handleRefreshUCategoryClick}
                 filtersDialog={FilterDialog({nameFilter, setNameFilter})}
                 filterAction={handleFilterClick}
                 addAction={() => {handleAddButtonClick()}}
               />
             </div>
             <Table
-              headers={['Nome']}
+              headers={['ID', 'Nome']}
               rows={rows}
               className="categories-table"
               deleteAction={handleDeleteCategoryClick}
