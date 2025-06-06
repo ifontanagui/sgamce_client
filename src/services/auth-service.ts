@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "@/resources/api";
 
 interface LoginReply {
   success: boolean,
@@ -12,15 +12,9 @@ interface LoginReply {
 }
 
 export async function Login(email: string, password: string): Promise<LoginReply> {
-  const { data } = await axios.post(`http://127.0.0.1:8000/api/login`, {
+  const { data } = await api.post('/login', {
     email,
     senha: password
-  },
-  {
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    withCredentials: true
   });
 
   if (!data.success) 

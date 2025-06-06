@@ -1,11 +1,15 @@
 import { IRow } from "@/components/Table";
-import axios from "axios";
-import { getCookie } from "cookies-next";
+import api from "@/resources/api";
 
 interface BaseInternalGetRowsReply {
   success: boolean,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[]
+}
+interface BaseInternalGetRowReply {
+  success: boolean,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any
 }
 
 export interface BaseGetRowsReply {
@@ -19,50 +23,45 @@ export interface BasePostReply {
 }
 
 export async function BaseGetRowsRequest(path: string): Promise<BaseInternalGetRowsReply> {
-  const token = getCookie('token');
   try {
-    const { data } = await axios.get(`http://127.0.0.1:8000/api${path}`,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      withCredentials: true
-    });
+    const { data } = await api.get(path);
     
     return {
       success: true,
       data: data.DATA
     }
+  }
+  catch(err) {    
+    console.error(err);    
+    return { success: false, data: [] }
+  }
 }
-  catch(err) {
-    console.log(err);
+
+export async function BaseGetRowRequest(path: string): Promise<BaseInternalGetRowReply> {
+  try {
+    const { data } = await api.get(path);
+
+    return {
+      success: true,
+      data: data.DATA
+    }
+}
+catch(err) {
+    console.error(err);
     return { success: false, data: [] }
   }
 }
 
 export async function BasePostRequest(path: string, body: object): Promise<BasePostReply> {
-  const token = getCookie('token');
   try {
-    const { data } = await axios.post(
-      `http://127.0.0.1:8000/api${path}`, 
-      body,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        withCredentials: true
-      }
-    );
+    const { data } = await api.post(path, body);
 
-    console.log('data: ', data);
     return !!data.success
       ? { success: true, }
       : { success: false, message: data.message || "" }
   }
   catch(err) {
-    console.log(err);
+    console.error(err);    
     return { success: false, message: "" }
   }
 }

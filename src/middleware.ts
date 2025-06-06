@@ -34,10 +34,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (authToken && !publicRoute) {
-    //Checar ser o JWT esta expirado
-    //Se sim, redirecionar para o SignIn
-  
+  if (authToken && !publicRoute) {  
     return NextResponse.next();
   }
 }

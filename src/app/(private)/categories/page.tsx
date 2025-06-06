@@ -58,7 +58,6 @@ export default function Categories() {
   }, [reload]);
 
   React.useEffect(() => {
-    console.log('toastMessage: ', toastMessage);
     DispatchToast(toastMessage);
   }, [toastMessage])
 
@@ -77,7 +76,6 @@ export default function Categories() {
 
     if (isEdit){
       const response = await EditCategory(id, name);
-      console.log('response: ', response);
       if (response.success) {
         setReload(true);
         setIsEdit(false);
