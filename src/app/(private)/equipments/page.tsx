@@ -9,27 +9,18 @@ import InputText from "@/components/InputText";
 import Combo from "@/components/Combo";
 import { Drawer, FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import Button from "@/components/Button";
+import { CreateEquipment, EditEquipment, EquipmentData, FindEquipmentsRows, ParseToIRow } from "@/services/equipments-service";
+import { CategoryData, FindCategoriesRows } from "@/services/categories-service";
+import Toast, { DispatchToast, DispatchToastProps } from "@/components/Toast";
 
-const OGRows = [
-  { data: ['Maquina 01', "Computador", "Dell", "0", "12"] },
-  { data: ['Vidraria 01', "Vidraria", "Dell", "12", "0"] },
-  { data: ['Maquina 02', "Computador", "Dell", "0", "12"] },
-  { data: ['Vidraria 02', "Vidraria", "Dell", "12", "0"] },
-  { data: ['Maquina 03', "Computador", "Dell", "0", "12"] },
-  { data: ['Vidraria 03', "Vidraria", "Dell", "12", "0"] },
-  { data: ['Maquina 04', "Computador", "Dell", "0", "12"] },
-  { data: ['Vidraria 04', "Vidraria", "Dell", "12", "0"] },
-  { data: ['Maquina 05', "Computador", "Dell", "0", "12"] },
-  { data: ['Vidraria 05', "Vidraria", "Dell", "12", "0"] },
-] as IRow[];
-let rows = OGRows;
 
 function FilterDialog(props: {
-  nameFilter: string, 
+  nameFilter: string,
   setNameFilter: React.Dispatch<React.SetStateAction<string>>
-  manufacturerCompanyFilter: string, 
+  manufacturerCompanyFilter: string,
   setManufacturerCompanyFilter: React.Dispatch<React.SetStateAction<string>>
-  categoryFilter: string, 
+  categories: CategoryData[];
+  categoryFilter: string,
   setCategoryFilter: React.Dispatch<React.SetStateAction<string>>
 }) {
   return (
@@ -49,12 +40,12 @@ function FilterDialog(props: {
         onChange={(event) => { props.setManufacturerCompanyFilter(event.target.value) }}
       />
       <div className='equipments-filter-combo'>
-        <Combo 
-          title="Categoria" 
+        <Combo
+          title="Categoria"
           value={props.categoryFilter}
           onChange={(value: string | number) => props.setCategoryFilter(value.toString())}
-          valuesList={[{description: "Computador", value: "COMPUTADOR"}, {description: "Vidraria", value: "VIDRARIA"}, {description: "Balança", value: "BALANCA"}]}
-          emptyValue 
+          valuesList={props.categories.map(x => { return { value: x.id, description: x.nome } })}
+          emptyValue
         />
       </div>
     </div>
@@ -62,7 +53,13 @@ function FilterDialog(props: {
 }
 
 export default function Equipments() {
+  const [rows, setRows] = React.useState([] as IRow[]);
+  const [data, setData] = React.useState([] as EquipmentData[]);
+  const [categoriesData, setCategoriesData] = React.useState([] as CategoryData[]);
+  
+
   const [reload, setReload] = React.useState(true);
+  const [id, setId] = React.useState(0);
   const [name, setName] = React.useState("");
   const [category, setCategory] = React.useState("");
   const [manufacturerCompany, setManufacturerCompany] = React.useState("");
@@ -77,55 +74,119 @@ export default function Equipments() {
   const [openDrawer, setOpenDrawer] = React.useState(false);
   const [newlyOpened, setNewlyOpened] = React.useState(true);
   const [isEdit, setIsEdit] = React.useState(false);
-  
+  const [toastMessage, setToastMessage] = React.useState({type: "success", message: ""} as DispatchToastProps);
+
 
   React.useEffect(() => {
     if (reload) {
       (async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        const [equipmentsRowsReply, categoriesRowsReply] = await Promise.all([
+          FindEquipmentsRows(),
+          FindCategoriesRows()
+        ]);
+
+        setData(equipmentsRowsReply.data);
+        setRows(ParseToIRow(equipmentsRowsReply.data));
+        setCategoriesData(categoriesRowsReply.data);
+
         setReload(false);
       })().catch(console.error);
     }
   }, [reload]);
 
+  React.useEffect(() => {
+    if (isEdit) {
+      (async () => {
+        const equipment = data.find(x => x.id === id);
+        
+        if (equipment){
+          setName(equipment.equipamento)
+          setManufacturerCompany(equipment.marca);
+          setCategory(equipment.id_categoria?.toString() || "");
+          setCalibrationFrequency(equipment.periodicidade_calibracao);
+          setMaintenanceFrequency(equipment.periodicidade_manutencao);
+          setExtraInfos(equipment.criterio_aceitacao_calibracao)
+          setAnalogDigital(equipment.tipo);
+        }
+
+        setReload(false);
+      })().catch(console.error);
+    }
+  }, [openDrawer]);
+  
+  React.useEffect(() => {
+    DispatchToast(toastMessage);
+  }, [toastMessage])
+
 
   const handleFilterClick = async () => {
-    rows = OGRows;
-    setReload(!reload);
+    let equipmentsRows = data;
 
-    if (!nameFilter && !manufacturerCompanyFilter && !categoryFilter) return;
+    if (!!nameFilter)
+      equipmentsRows = equipmentsRows.filter(x => x.equipamento.toString().toLowerCase().includes(nameFilter.toLowerCase()));
 
-    if (nameFilter)
-      rows = rows.filter(x => x.data[0].toString().toLowerCase().includes(nameFilter.toLowerCase()));
+    if (!!manufacturerCompanyFilter)
+      equipmentsRows = equipmentsRows.filter(x => x.marca.toString().toLowerCase().includes(manufacturerCompanyFilter.toLowerCase()));
 
-    if (manufacturerCompanyFilter)
-      rows = rows.filter(x => x.data[2].toString().toLowerCase().includes(manufacturerCompanyFilter.toLowerCase()));
-
-    if (categoryFilter)
-      rows = rows.filter(x => x.data[1].toString().toLowerCase().includes(categoryFilter.toLowerCase()));
-  }
+    if (!!categoryFilter)
+      equipmentsRows = equipmentsRows.filter(x => x.id_categoria?.toString().toLowerCase().includes(categoryFilter.toLowerCase()));
   
-  const handleAddButtonClick = () => {
-    setOpenDrawer(true)    
+    setRows(ParseToIRow(equipmentsRows));
   }
-  
-  const handleAddEquipmentClick = async() => {
-    setNewlyOpened(false);
-    
-    if (!name || !category || !manufacturerCompany) return false;
 
-    if (!isEdit)
-      rows.push({
-        data: [ name, category, manufacturerCompany, calibrationFrequency, maintenanceFrequency ]
-      })
-    
-    setIsEdit(false);
-    handleCloseAddEquipment();
+  const handleRefreshEquipmentClick = async() => {
+    setNameFilter("");
+    setManufacturerCompanyFilter("");
+    setCategoryFilter("");
+    setReload(true);
 
     return true;
-  } 
-  
-  const handleCloseAddEquipment = () => {   
+  }
+
+  const handleAddButtonClick = () => {
+    setOpenDrawer(true)
+  }
+
+  const handleAddEquipmentClick = async() => {
+    setNewlyOpened(false);
+
+    if (!name || !category || !manufacturerCompany ) return false;
+
+    if (isEdit){
+      const response = await EditEquipment(id, name, manufacturerCompany, Number(category), calibrationFrequency, maintenanceFrequency, extraInfos, analogDigital);
+      if (response.success) {
+        setReload(true);
+        setIsEdit(false);
+        handleCloseAddEquipment();
+
+        setToastMessage({type: "success", message:  "Categoria editada com sucesso!"})
+      }
+      else {
+        console.log(2736287);
+        setToastMessage({type: "error", message:  response.message || "Erro ao editar a categoria, tente novamente"});
+      }
+
+      return response.success;
+    }
+    else {
+      const response = await CreateEquipment(name, manufacturerCompany, Number(category), calibrationFrequency, maintenanceFrequency, extraInfos, analogDigital);
+      if (response.success) {
+        setReload(true);
+        setIsEdit(false);
+        handleCloseAddEquipment();
+
+        setToastMessage({type: "success", message:  "Categoria criada com sucesso"});
+      }
+      else {
+        setToastMessage({type: "error", message:  response.message || "Erro ao cadastrar a categoria, tente novamente"});
+      }
+
+      return response.success;
+    }
+  }
+
+  const handleCloseAddEquipment = () => {
     setName("");
     setCategory("");
     setManufacturerCompany("");
@@ -135,20 +196,18 @@ export default function Equipments() {
     setMaintenanceFrequency(0);
     setAnalogDigital("D");
     setNewlyOpened(true);
+    setIsEdit(false);
   }
-    
-  const handleDeleteEquipmentClick = (row: IRow) => {
-    rows = rows.filter(r => r.data[0] !== row.data[0])
 
+  const handleDeleteEquipmentClick = (row: IRow) => {
+    // rows = rows.filter(r => r.data[0] !== row.data[0])
+    console.log(row);
     setReload(true);
   }
-    
+
   const handleEditEquipmentAction = (row: IRow) => {
-    setName(row.data[0].toString());
-    setCategory(row.data[1].toString());
-    setManufacturerCompany(row.data[2].toString());
-    setCalibrationFrequency(Number.parseInt(row.data[3].toString()));
-    setMaintenanceFrequency(Number.parseInt(row.data[4].toString()));
+    setId(Number.parseInt(row.data[0].toString()))
+    setIsEdit(true)
     setOpenDrawer(true);
   }
 
@@ -159,15 +218,23 @@ export default function Equipments() {
           <div className="equipments-header">
             <strong className='equipments-header-title'>Maquinas e Equipamentos</strong>
             <DefaultActions
-              refreshAction={handleFilterClick}
-              filtersDialog={FilterDialog({nameFilter, setNameFilter, manufacturerCompanyFilter, setManufacturerCompanyFilter, categoryFilter, setCategoryFilter})}
+              refreshAction={handleRefreshEquipmentClick}
+              filtersDialog={FilterDialog({
+                nameFilter, 
+                setNameFilter, 
+                manufacturerCompanyFilter, 
+                setManufacturerCompanyFilter, 
+                categories: categoriesData, 
+                categoryFilter,
+                setCategoryFilter
+              })}
               filterAction={handleFilterClick}
               addAction={() => {handleAddButtonClick()}}
             />
           </div>
           <div className="equipments-tab-table">
             <Table
-              headers={["Nome", "Categoria", "Marca", "Per. Calibração", "Per. Manutenção"]}
+              headers={["ID", "Nome", "Categoria", "Marca", "Per. Calibração", "Per. Manutenção"]}
               rows={rows}
               className="equipments-table"
               deleteAction={handleDeleteEquipmentClick}
@@ -214,12 +281,12 @@ export default function Equipments() {
                 defaultRows={5}
               />
               <div className='equipments-combo'>
-                <Combo 
-                  title="Categoria" 
+                <Combo
+                  title="Categoria"
                   value={category}
                   onChange={(value: string | number) => setCategory(value.toString())}
-                  valuesList={[{description: "Computador", value: "Computador"}, {description: "Vidraria", value: "Vidraria"}, {description: "Balança", value: "Balança"}]}
-                  emptyValue 
+                  valuesList={categoriesData.map(x => { return { value: x.id, description: x.nome } })}
+                  emptyValue
                   required
                 />
               </div>
@@ -250,7 +317,7 @@ export default function Equipments() {
                 multiline
                 defaultRows={5}
               />
-              <RadioGroup 
+              <RadioGroup
                 className="analog-digital-radios"
                 onChange={(event) => setAnalogDigital(event.target.value)}
                 value={analogDigital}
@@ -267,17 +334,18 @@ export default function Equipments() {
                   value='D'
                 />
               </RadioGroup>
-              <Button 
+              <Button
                 className="save-button"
                 onClick={async () => {
                   const result = await handleAddEquipmentClick();
                   if (result)
                     setOpenDrawer(false);
-                }} 
+                }}
                 textContent='Salvar'
               />
             </div>
           </Drawer>
+          <Toast />
         </div>
   );
 }
