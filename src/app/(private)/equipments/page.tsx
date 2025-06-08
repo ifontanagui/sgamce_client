@@ -105,6 +105,7 @@ export default function Equipments() {
         if (equipment){
           setName(equipment.equipamento)
           setManufacturerCompany(equipment.marca);
+          setDescription(equipment.identificacao)
           setCategory(equipment.id_categoria?.toString() || "");
           setCalibrationFrequency(equipment.periodicidade_calibracao);
           setMaintenanceFrequency(equipment.periodicidade_manutencao);
@@ -161,7 +162,9 @@ export default function Equipments() {
     if (!name || !category || !manufacturerCompany ) return false;
 
     if (isEdit){
-      const response = await EditEquipment(id, name, manufacturerCompany, Number(category), calibrationFrequency, maintenanceFrequency, extraInfos, analogDigital);
+      const numero_patrimonio = data.find(x => x.id === id)?.numero_patrimonio;
+
+      const response = await EditEquipment(id, name, description, manufacturerCompany, Number(category), calibrationFrequency, maintenanceFrequency, extraInfos, analogDigital, numero_patrimonio);
       if (response.success) {
         setReload(true);
         setIsEdit(false);
@@ -176,7 +179,7 @@ export default function Equipments() {
       return response.success;
     }
     else {
-      const response = await CreateEquipment(name, manufacturerCompany, Number(category), calibrationFrequency, maintenanceFrequency, extraInfos, analogDigital);
+      const response = await CreateEquipment(name, description, manufacturerCompany, Number(category), calibrationFrequency, maintenanceFrequency, extraInfos, analogDigital);
       if (response.success) {
         setReload(true);
         setIsEdit(false);
@@ -250,7 +253,7 @@ export default function Equipments() {
           </div>
           <div className="equipments-tab-table">
             <Table
-              headers={["ID", "Nome", "Categoria", "Marca", "Per. Calibração", "Per. Manutenção"]}
+              headers={["ID", "Nome", "Categoria", "Marca", "Per. Calibração (anos)", "Per. Manutenção (anos)"]}
               rows={rows}
               className="equipments-table"
               deleteAction={handleDeleteEquipmentClick}
@@ -290,6 +293,7 @@ export default function Equipments() {
               <InputText
                 type='text'
                 placeholder='Descrição'
+                required
                 value={description}
                 className='equipment-data-input'
                 onChange={(event) => { setDescription(event.target.value) }}
@@ -308,7 +312,7 @@ export default function Equipments() {
               </div>
               <InputText
                 type='number'
-                placeholder='Frequência de Calibração (meses)'
+                placeholder='Frequência de Calibração (anos)'
                 required
                 value={calibrationFrequency}
                 className='equipment-data-input'
@@ -317,7 +321,7 @@ export default function Equipments() {
               />
               <InputText
                 type='number'
-                placeholder='Frequência de Manutenção (meses)'
+                placeholder='Frequência de Manutenção (anos)'
                 required
                 value={maintenanceFrequency}
                 className='equipment-data-input'
@@ -326,7 +330,7 @@ export default function Equipments() {
               />
               <InputText
                 type='text'
-                placeholder='Informações extras'
+                placeholder='Critérios de Aceitação'
                 value={extraInfos}
                 className='equipment-data-input'
                 onChange={(event) => { setExtraInfos(event.target.value) }}

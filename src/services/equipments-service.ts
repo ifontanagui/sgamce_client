@@ -39,6 +39,7 @@ export async function FindEquipment(id: number): Promise<EquipmentData | null> {
 
 export async function CreateEquipment(
   equipamento: string, 
+  identificacao: string,
   marca: string,
   id_categoria: number, 
   periodicidade_calibracao: number,
@@ -56,23 +57,23 @@ export async function CreateEquipment(
     periodicidade_manutencao,
     criterio_aceitacao_calibracao,
     tipo,    
-    numero_patrimonio: rand,
-    identificacao: rand
+    identificacao,
+    numero_patrimonio: rand
    })
 }
 
 export async function EditEquipment(
   id: number,
-  equipamento: string, 
+  equipamento: string,
+  identificacao: string,
   marca: string,
   id_categoria: number, 
   periodicidade_calibracao: number,
   periodicidade_manutencao: number,
   criterio_aceitacao_calibracao: string,
-  tipo: string
+  tipo: string,
+  numero_patrimonio?: number
 ): Promise<BasePostReply> {
-  const rand =  Math.trunc(Math.random() * 2000000000)
-
   return BasePostRequest('/modelo/atualizar', { 
     id,
     equipamento, 
@@ -82,8 +83,8 @@ export async function EditEquipment(
     periodicidade_manutencao,
     criterio_aceitacao_calibracao,
     tipo,
-    numero_patrimonio: rand,
-    identificacao: rand
+    identificacao,
+    numero_patrimonio: numero_patrimonio || Math.trunc(Math.random() * 2000000000)
    })
 }
 
