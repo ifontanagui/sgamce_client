@@ -10,6 +10,7 @@ import Button from "@/components/Button";
 import { Drawer } from "@mui/material";
 import { CategoryData, CreateCategory, EditCategory, FindCategoriesRows } from "@/services/categories-service";
 import Toast, { DispatchToast, DispatchToastProps } from "@/components/Toast";
+import { getCookie } from "cookies-next";
 
 function FilterDialog(props: {
   nameFilter: string, 
@@ -29,6 +30,8 @@ function FilterDialog(props: {
 }
 
 export default function Categories() {
+  const userIsAdmin = JSON.parse(getCookie('payload')?.toString() || "{}").admin || false;
+  
   const [rows, setRows] = React.useState([] as IRow[]);
   const [data, setData] = React.useState([] as CategoryData[]);
 
@@ -120,6 +123,11 @@ export default function Categories() {
   }
 
   const handleDeleteCategoryClick = (row: IRow) => {
+    if (!userIsAdmin) {
+      setToastMessage({type: "error", message: "Somente administradores podem remover categorias"})
+      return;
+    }
+
     const categoriesRows = rows.filter(r => r.data[0] !== row.data[0])
     setRows(categoriesRows);
 
@@ -127,6 +135,11 @@ export default function Categories() {
   }
 
   const handleEditCategoryAction = (row: IRow) => {
+    if (!userIsAdmin) {
+      setToastMessage({type: "error", message: "Somente administradores podem editar categorias"})
+      return;
+    }
+
     setId(Number.parseInt(row.data[0].toString()));
     setName(row.data[1].toString());
     setOpenDrawer(true);
@@ -134,6 +147,11 @@ export default function Categories() {
   }
 
   const handleAddButtonClick = () => {
+    if (!userIsAdmin) {
+      setToastMessage({type: "error", message: "Somente administradores podem adicionar novas categorias"})
+      return;
+    }
+
     setOpenDrawer(true)    
   }
   

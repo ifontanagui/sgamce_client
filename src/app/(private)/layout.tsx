@@ -8,10 +8,10 @@ import { AccountCircle, Place, PrecisionManufacturing, KeyboardDoubleArrowDown, 
 import { deleteCookie, getCookie } from "cookies-next";
 
 const menuItems = [
-  { description: "Categorias", url: "/categories", icon: <Category className="private-layout-header-sub-menu-list-item-icon"/> },
-  { description: "Equipamentos", url: "/equipments", icon: <PrecisionManufacturing className="private-layout-header-sub-menu-list-item-icon"/> },
-  { description: "Salas e Laboratórios", url: "/rooms", icon: <Place className="private-layout-header-sub-menu-list-item-icon"/> },
-  { description: "Vincular à Salas", url: "/link-rooms", icon: <Cable className="private-layout-header-sub-menu-list-item-icon"/> },
+  { description: "Categorias", url: "/categories", icon: <Category className="private-layout-header-sub-menu-list-item-icon"/>, onlyAdmin: false },
+  { description: "Equipamentos", url: "/equipments", icon: <PrecisionManufacturing className="private-layout-header-sub-menu-list-item-icon"/>, onlyAdmin: false },
+  { description: "Salas e Laboratórios", url: "/rooms", icon: <Place className="private-layout-header-sub-menu-list-item-icon"/>, onlyAdmin: true },
+  { description: "Vincular à Salas", url: "/link-rooms", icon: <Cable className="private-layout-header-sub-menu-list-item-icon"/>, onlyAdmin: true },
 ] as const;
 
 
@@ -62,7 +62,7 @@ export default function PrivateLayout({
         <div className={`private-layout-header-menu-${openMenu ? "open" : "close"}`}>
           {openMenu && 
           <div className="private-layout-header-menu-list">
-            {menuItems.map((menu) => (
+            {menuItems.filter(x => !!payload.admin || !x.onlyAdmin).map((menu) => (
               <div className="private-layout-header-menu-list-item flex" onClick={() => router.push(menu.url)} key={menu.description}>
                 {menu.icon}
                 <span className="private-layout-header-menu-list-item-text">{menu.description}</span>

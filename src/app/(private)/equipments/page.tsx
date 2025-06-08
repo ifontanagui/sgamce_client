@@ -12,6 +12,7 @@ import Button from "@/components/Button";
 import { CreateEquipment, EditEquipment, EquipmentData, FindEquipmentsRows, ParseToIRow } from "@/services/equipments-service";
 import { CategoryData, FindCategoriesRows } from "@/services/categories-service";
 import Toast, { DispatchToast, DispatchToastProps } from "@/components/Toast";
+import { getCookie } from "cookies-next";
 
 
 function FilterDialog(props: {
@@ -53,10 +54,11 @@ function FilterDialog(props: {
 }
 
 export default function Equipments() {
+  const userIsAdmin = JSON.parse(getCookie('payload')?.toString() || "{}").admin || false;
+
   const [rows, setRows] = React.useState([] as IRow[]);
   const [data, setData] = React.useState([] as EquipmentData[]);
   const [categoriesData, setCategoriesData] = React.useState([] as CategoryData[]);
-  
 
   const [reload, setReload] = React.useState(true);
   const [id, setId] = React.useState(0);
@@ -145,6 +147,11 @@ export default function Equipments() {
   }
 
   const handleAddButtonClick = () => {
+    if (!userIsAdmin) {
+      setToastMessage({type: "error", message: "Somente administradores podem adicionar novos equipamentos"})
+      return;
+    }
+
     setOpenDrawer(true)
   }
 
@@ -199,12 +206,22 @@ export default function Equipments() {
   }
 
   const handleDeleteEquipmentClick = (row: IRow) => {
+    if (!userIsAdmin) {
+      setToastMessage({type: "error", message: "Somente administradores podem remover equipamentos"})
+      return;
+    }
+
     // rows = rows.filter(r => r.data[0] !== row.data[0])
     console.log(row);
     setReload(true);
   }
 
   const handleEditEquipmentAction = (row: IRow) => {
+    if (!userIsAdmin) {
+      setToastMessage({type: "error", message: "Somente administradores podem editar equipamentos"})
+      return;
+    }
+
     setId(Number.parseInt(row.data[0].toString()))
     setIsEdit(true)
     setOpenDrawer(true);
