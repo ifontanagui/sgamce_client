@@ -163,7 +163,6 @@ export default function Equipments() {
         setToastMessage({type: "success", message:  "Categoria editada com sucesso!"})
       }
       else {
-        console.log(2736287);
         setToastMessage({type: "error", message:  response.message || "Erro ao editar a categoria, tente novamente"});
       }
 

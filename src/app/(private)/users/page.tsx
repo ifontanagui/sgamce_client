@@ -8,24 +8,8 @@ import InputText from '@/components/InputText';
 import { FormGroup, FormControlLabel, Checkbox, Drawer } from '@mui/material';
 import DefaultSkeleton from '@/components/DefaultSkeleton';
 import Button from "@/components/Button";
-
-const OGRows = [
-  { data: ['Renato Heitor Nascimento', 'rhnascimento@ucs.br', true], subList: { headers: ["Bloco", "Sala"], title: "Salas", rows: [["Bloco A", 201],["Bloco A", 202],["Bloco A", 203],["Bloco A", 204],["Bloco A", 205],["Bloco A", 206],["Bloco A", 207],["Bloco A", 208],["Bloco A", 209],] } },
-  { data: ['Nicole Isabel Chaves', 'nichaves@ucs.br', false] },
-  { data: ['Letícia Analu Luzia Aragão', 'lalaragao@ucs.br', false] },
-  { data: ['Emanuel Jorge Lopes', 'ejlopes@ucs.br', false] },
-  { data: ['Yago Igor Ricardo Aragão', 'yiraragao@ucs.br', true] },
-  { data: ['Nina Maya Maria Sales', 'nmmsales@ucs.br', false], subList: { headers: ["Bloco", "Sala"], title: "Salas" } },
-  { data: ['Guilherme Mário Joaquim Sartori', 'gmjsartori@ucs.br', false], subList: { headers: ["Bloco", "Sala"], title: "Salas", rows: [["Bloco A", 201],["Bloco A", 202],["Bloco A", 203],["Bloco A", 204],["Bloco A", 205],["Bloco A", 206],["Bloco A", 207],] } },
-  { data: ['Yago Igor Ricardo Aragão', 'yiraragao@ucs.br', false] },
-  { data: ['Kauê Yuri Mendes', 'ykymendes@ucs.br', false] },
-  { data: ['Mariana Oliva', 'moliva@ucs.br', false] },
-  { data: ['Felipe Samuel Benedito Figueiredo', 'fsbfigueiredo@ucs.br', false] },
-  { data: ['Kamilly Yasmin Marlene', 'kymarlene@ucs.br', true] },
-  { data: ['Mariah Francisca Daniela Castro', 'mfdcastro@ucs.br', false] },
-  { data: ['Antonella Aurora Esther', 'aaesther@ucs.br', false] },
-] as IRow[];
-let rows = OGRows;
+import Toast, { DispatchToast, DispatchToastProps } from '@/components/Toast';
+import { CreateUser, EditUser, FindUsersRows, ParseToIRow, UserData } from '@/services/users-service';
 
 
 function FilterDialog(props: {
@@ -46,7 +30,11 @@ function FilterDialog(props: {
 }
 
 export default function Users() {
+  const [rows, setRows] = React.useState([] as IRow[]);
+  const [data, setData] = React.useState([] as UserData[]);
+
   const [reload, setReload] = React.useState(true);
+  const [id, setId] = React.useState(0);
   const [userFilter, setUserFilter] = React.useState("");
   const [username, setUsername] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -57,44 +45,97 @@ export default function Users() {
   const [differentPassword, setDifferentPassword] = React.useState(false);
   const [openDrawer, setOpenDrawer] = React.useState(false);
   const [isEdit, setIsEdit] = React.useState(false);
+  const [toastMessage, setToastMessage] = React.useState({type: "success", message: ""} as DispatchToastProps);
   
   React.useEffect(() => {
     if (reload) {
       (async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const usersRowsReply = await FindUsersRows();
+        setData(usersRowsReply.data);
+        setRows(ParseToIRow(usersRowsReply.data));
+
+        if (!usersRowsReply.success) {
+          setToastMessage({ type: "error", message: "Ocorreu um erro ao buscar os usuários, tente novamente" })
+        }
+        
+
         setReload(false);
       })().catch(console.error);
-  }
-}, [reload]);
+    }
+  }, [reload]);
+
+  React.useEffect(() => {
+    if (isEdit) {
+      (async () => {
+        const user = data.find(x => x.id === id);
+        
+        if (user){
+          setUsername(user.nome);
+          setEmail(user.email);
+          setPassword("");
+          setConfPassword("");
+          setIsAdmin(user.admin)
+        }
+
+        setReload(false);
+      })().catch(console.error);
+    }
+  }, [openDrawer]);
+    
+  React.useEffect(() => {
+    DispatchToast(toastMessage);
+  }, [toastMessage])
   
   const handleFilterClick = async () => {
-    rows = OGRows;
-    setReload(!reload);
+    let userRows = data
 
-    if (!userFilter) return;
+    if (userFilter) {
+      userRows = userRows.filter(x => x.nome.toLocaleLowerCase().includes(userFilter.toLowerCase()))
+    };
 
-    rows = rows.filter(x => x.data[0].toString().toLowerCase().includes(userFilter.toLowerCase()));
+    setRows(ParseToIRow(userRows))
   }
 
   const handleAddUserClick = async() => {
     setNewlyOpened(false);
 
-    if (!username || !email || !password) return false;
+    if (!username || !email) return false;
 
-    if (password !== confPassword) {
+    if (!password && !isEdit) return false;
+
+    if (!!password && password !== confPassword) {
       setDifferentPassword(true);
       return false;
     }
-    
-    if (!isEdit)
-      rows.push({
-        data: [ username, email,isAdmin ]
-      })
-    
-    setIsEdit(false);
-    handleCloseAddUser();
 
-    return true;
+    if (isEdit){
+      const response = await EditUser(id, username, email, isAdmin, password || null)
+      if (response.success) {
+        setReload(true);
+        handleCloseAddUser();
+
+        setToastMessage({type: "success", message:  "Usuário editado com sucesso!"})
+      }
+      else {
+        setToastMessage({type: "error", message:  response.message || "Erro ao editar a usuário, tente novamente"});
+      }
+
+      return response.success;
+    }
+    else {
+      const response = await CreateUser(username, email, password, isAdmin)
+      if (response.success) {
+        setReload(true);
+        handleCloseAddUser();
+
+        setToastMessage({type: "success", message:  "Usuário criado com sucesso"});
+      }
+      else {
+        setToastMessage({type: "error", message:  response.message || "Erro ao cadastrar a usuário, tente novamente"});
+      }
+
+      return response.success;
+    }
   }
 
   const handleCloseAddUser = () => {   
@@ -105,6 +146,7 @@ export default function Users() {
     setIsAdmin(false);
     setDifferentPassword(false);
     setNewlyOpened(true);
+    setIsEdit(false);
   }
 
   const handleAddButtonClick = () => {
@@ -112,18 +154,14 @@ export default function Users() {
   }
   
   const handleDeleteUserClick = (row: IRow) => {
-    rows = rows.filter(r => r.data[0] !== row.data[0])
-
+    // rows = rows.filter(r => r.data[0] !== row.data[0])
+    console.log('row: ', row);
     setReload(true);
   }
 
   const handleEditCategoryAction = (row: IRow) => {
-    setUsername(row.data[0].toString());
-    setEmail(row.data[1].toString());
-    setPassword("132123123113");
-    setConfPassword("132123123113");
-    setIsAdmin(!row.data[2]);
-
+    setId(Number.parseInt(row.data[0].toString()))
+    setIsEdit(true)
     setOpenDrawer(true);
   }
 
@@ -143,7 +181,7 @@ export default function Users() {
             />
           </div>
           <Table
-            headers={['Nome', 'Email', 'Administrador']}
+            headers={['ID', 'Nome', 'Email', 'Administrador']}
             rows={rows}
             className="users-table"
             deleteAction={handleDeleteUserClick}
@@ -183,22 +221,22 @@ export default function Users() {
               <InputText
                 type='password'
                 placeholder='Senha'
-                required
+                required={!isEdit}
                 value={password}
                 hiddenDefaultIcon
                 className='user-data-input'
                 helperText={!password ? 'É obrigatório informar uma senha' : 'As senhas não conferem'}
-                error={differentPassword || (!newlyOpened && !password)}
+                error={differentPassword || (!newlyOpened && !password && !isEdit)}
                 onChange={(event) => { setPassword(event.target.value) }}
               />
               <InputText
                 type='password'
                 placeholder='Confirmar Senha'
-                required
+                required={!isEdit}
                 value={confPassword}
                 hiddenDefaultIcon
                 className='user-data-input'
-                error={differentPassword || (!newlyOpened && !password)}
+                error={differentPassword || (!newlyOpened && !password && !isEdit)}
                 helperText={!password && !confPassword ? 'É obrigatório confirmar a senha' : 'As senhas não conferem'}
                 onChange={(event) => { setConfPassword(event.target.value) }}
               />
@@ -207,6 +245,7 @@ export default function Users() {
                   control={
                     <Checkbox 
                       value={isAdmin}
+                      checked={isAdmin}
                       onChange={(event: React.ChangeEvent<HTMLInputElement>) => { setIsAdmin(event.target.checked); }}
                     />
                   } 
@@ -223,6 +262,7 @@ export default function Users() {
               />
             </div>
           </Drawer>
+          <Toast />
         </div>
   )
 }
