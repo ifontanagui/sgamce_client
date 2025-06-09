@@ -220,11 +220,6 @@ export default function Equipments() {
   }
 
   const handleEditEquipmentAction = (row: IRow) => {
-    if (!userIsAdmin) {
-      setToastMessage({type: "error", message: "Somente administradores podem editar equipamentos"})
-      return;
-    }
-
     setId(Number.parseInt(row.data[0].toString()))
     setIsEdit(true)
     setOpenDrawer(true);
@@ -278,6 +273,7 @@ export default function Equipments() {
                 className='equipment-data-input'
                 error={!newlyOpened && !name}
                 helperText='É obrigatório informar o nome'
+                disabled={!userIsAdmin}
                 onChange={(event) => { setName(event.target.value) }}
               />
               <InputText
@@ -288,6 +284,7 @@ export default function Equipments() {
                 className='equipment-data-input'
                 error={!newlyOpened && !manufacturerCompany}
                 helperText='É obrigatório informar a marca'
+                disabled={!userIsAdmin}
                 onChange={(event) => { setManufacturerCompany(event.target.value) }}
               />
               <InputText
@@ -298,6 +295,7 @@ export default function Equipments() {
                 className='equipment-data-input'
                 onChange={(event) => { setDescription(event.target.value) }}
                 multiline
+                disabled={!userIsAdmin}
                 defaultRows={5}
               />
               <div className='equipments-combo'>
@@ -308,6 +306,7 @@ export default function Equipments() {
                   valuesList={categoriesData.map(x => { return { value: x.id, description: x.nome } })}
                   emptyValue
                   required
+                  disabled={!userIsAdmin}
                 />
               </div>
               <InputText
@@ -317,6 +316,7 @@ export default function Equipments() {
                 value={calibrationFrequency}
                 className='equipment-data-input'
                 helperText='É obrigatório informar a frequência de calibração'
+                disabled={!userIsAdmin}
                 onChange={(event) => { setCalibrationFrequency(Number.parseInt(event.target.value)) }}
               />
               <InputText
@@ -326,6 +326,7 @@ export default function Equipments() {
                 value={maintenanceFrequency}
                 className='equipment-data-input'
                 helperText='É obrigatório informar a frequência de manutenção'
+                disabled={!userIsAdmin}
                 onChange={(event) => { setMaintenanceFrequency(Number.parseInt(event.target.value)) }}
               />
               <InputText
@@ -334,6 +335,7 @@ export default function Equipments() {
                 value={extraInfos}
                 className='equipment-data-input'
                 onChange={(event) => { setExtraInfos(event.target.value) }}
+                disabled={!userIsAdmin}
                 multiline
                 defaultRows={5}
               />
@@ -347,10 +349,12 @@ export default function Equipments() {
                   labelPlacement="start"
                   label="Analógico"
                   value='A'
+                  disabled={!userIsAdmin}
                 />
                 <FormControlLabel
                   label="Digital"
                   control={<Radio className="radio" />}
+                  disabled={!userIsAdmin}
                   value='D'
                 />
               </RadioGroup>
@@ -361,6 +365,7 @@ export default function Equipments() {
                   if (result)
                     setOpenDrawer(false);
                 }}
+                disabled={!userIsAdmin}
                 textContent='Salvar'
               />
             </div>

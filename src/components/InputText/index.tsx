@@ -17,6 +17,7 @@ interface InputTextProps {
   multiline?: boolean
   defaultRows?: number
   hiddenDefaultIcon?: boolean
+  disabled?: boolean
   onChange: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>
 }
 
@@ -49,6 +50,7 @@ export default function InputText(props: InputTextProps) {
         value={props.value}
         onChange={props.onChange}
         variant="standard" 
+        disabled={props.disabled}
         multiline={props.multiline}
         rows={props.multiline && props.defaultRows ? props.defaultRows : 1}
         slotProps={{

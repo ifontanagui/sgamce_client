@@ -14,6 +14,7 @@ export interface ComboProps {
   helperText?: string
   error?: boolean;
   emptyValue?: boolean
+  disabled?: boolean
 }
 
 export default function Combo(props: ComboProps) {
@@ -23,6 +24,7 @@ export default function Combo(props: ComboProps) {
       <NativeSelect
         className={`select${props.error ? "-error" : ""}`}
         value={props.value}
+        disabled={props.disabled}
         onChange={((event) => props.onChange(event.target.value))}
       >
         {props.emptyValue && <option aria-label="None" value="" />}
