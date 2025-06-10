@@ -45,8 +45,6 @@ function Row({ row, withSubList, editAction, deleteAction, emptyTable, rowAction
         onClick={() => { 
             if (rowClick) 
               rowClick(row, index !== undefined ? index : -1); 
-            
-            setOpen(!open)
           }}
       >
           {withSubList &&
@@ -74,7 +72,7 @@ function Row({ row, withSubList, editAction, deleteAction, emptyTable, rowAction
         </>
         }
         {row.data.map(r => (
-            <TableCell key={Math.random()} align="left">
+            <TableCell key={Math.random()} align="left" onClick={() => setOpen(!open)}>
               {
                 typeof r !== 'boolean'
                   ? <TableCell className='table-row-cell-content' key={Math.random()}>{r}</TableCell>
@@ -110,7 +108,7 @@ function Row({ row, withSubList, editAction, deleteAction, emptyTable, rowAction
                   </TableRow>
                 </TableHead>
                 <TableBody className='table-row-sublist-list-row' >
-                  {row.subList?.rows 
+                  {row.subList?.rows?.length
                     ? row.subList?.rows.map((subRow) => (
                       <TableRow 
                         key={Math.random()}
