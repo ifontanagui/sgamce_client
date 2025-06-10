@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import InputText from "@/components/InputText"
 import Button from "@/components/Button";
 import { Login as LoginFunction } from "@/services/auth-service";
-import { toast } from "react-toastify";
 import { deleteCookie, setCookie } from "cookies-next";
 import Toast, { DispatchToast } from "@/components/Toast";
 

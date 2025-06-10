@@ -58,7 +58,6 @@ export default function Users() {
           setToastMessage({ type: "error", message: "Ocorreu um erro ao buscar os usuários, tente novamente" })
         }
         
-
         setReload(false);
       })().catch(console.error);
     }

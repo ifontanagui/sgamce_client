@@ -9,47 +9,20 @@ import DefaultSkeleton from "@/components/DefaultSkeleton";
 import DefaultActions from "@/components/DefaultActions";
 import InputText from "@/components/InputText";
 import Button from "@/components/Button";
-
-
-const OGRows = [
-  { data: ['Prédio 01'], subList: { headers: ["Sala", "Responsáveis"], title: "Salas", rows: [
-    ["Sala 200", "Responsável 01, Responsável 02, Responsável 03, Responsável 04, Responsável 05"],
-    ["Laboratório 200", "Responsável 01, Responsável 02, Responsável 03, Responsável 04, Responsável 05, Responsável 05, Responsável 05, Responsável 05, Responsável 05, Responsável 05, Responsável 05, Responsável 05, Responsável 05, Responsável 05, Responsável 05, Responsável 05"],
-    ["Sala 201", "Responsável 01, Responsável 02, Responsável 03, Responsável 04, Responsável 05"],
-    ["Laboratório 201", "Responsável 01, Responsável 02, Responsável 03, Responsável 04, Responsável 05"],
-    ["Sala 202", "Responsável 01, Responsável 02, Responsável 03, Responsável 04, Responsável 05"],
-    ["Laboratório 202", "Responsável 01, Responsável 02, Responsável 03, Responsável 04, Responsável 05"],
-    ["Sala 203", "Responsável 01, Responsável 02, Responsável 03, Responsável 04, Responsável 05"],
-    ["Laboratório 203", "Responsável 01, Responsável 02, Responsável 03, Responsável 04, Responsável 05"],
-    ["Sala 204", "Responsável 01, Responsável 02, Responsável 03, Responsável 04, Responsável 05"],
-    ["Laboratório 201", "Responsável 01, Responsável 02, Responsável 03, Responsável 04, Responsável 05"],
-  ] } },
-  { data: ['Prédio 02'] },
-  { data: ['Prédio 03'] },
-  { data: ['Prédio 04'] },
-  { data: ['Prédio 05'] },
-  { data: ['Prédio 06'] },
-  { data: ['Prédio 07'] },
-  { data: ['Prédio 08'] },
-  { data: ['Prédio 09'] },
-  { data: ['Prédio 10'] },
-  { data: ['Prédio 11'] },
-  { data: ['Prédio 12'] },
-  { data: ['Prédio 13'] },
-  { data: ['Prédio 14'] },
-] as IRow[];
-let rows = OGRows;
+import { AddressData, FindAddressRows, ParseToIRow } from "@/services/address-service";
+import Toast, { DispatchToastProps, DispatchToast } from "@/components/Toast";
 
 function rowActions(onClickAction:  React.Dispatch<React.SetStateAction<boolean>>) {
   return (
     <div className="add-room-action">
-      <IconButton onClick={() => onClickAction(true)}>
+      <IconButton onClick={() => {
+        onClickAction(true)}
+      }>
         <AddLocation className="add-room-action-icon"/>
       </IconButton>
     </div>
   )
 }
-
 
 function FilterDialog(props: {
   nameFilter: string, 
@@ -69,92 +42,135 @@ function FilterDialog(props: {
 }
 
 
-export default function Rooms() {
+export default function Address() {  
+  const [data, setData] = React.useState([] as AddressData[]);
+  const [buildRows, setBuildRows] = React.useState([] as IRow[]);
+  const [roomRows, setRoomRows] = React.useState([] as IRow[]);
+  
   const [reload, setReload] = React.useState(true);
+  const [buildId, setBuildId] = React.useState(0);
+  const [roomId, setRoomId] = React.useState(0);
   const [name, setName] = React.useState("");
-  const [extraInfos, setExtraInfos] = React.useState("");
   const [nameFilter, setNameFilter] = React.useState("");
   const [newlyOpened, setNewlyOpened] = React.useState(true);
   const [openDrawer, setOpenDrawer] = React.useState(false);
   const [openAddRoom, setOpenAddRoom] = React.useState(false);
   const [openAddRoomForm, setOpenAddRoomForm] = React.useState(false);
   const [isEdit, setIsEdit] = React.useState(false);
+  const [toastMessage, setToastMessage] = React.useState({type: "success", message: ""} as DispatchToastProps);
   
   React.useEffect(() => {
     if (reload) {
       (async () => {
+        const usersRowsReply = await FindAddressRows();
+        setData(usersRowsReply.data);
+        setBuildRows(ParseToIRow(usersRowsReply.data));
+
+        if (!usersRowsReply.success) {
+          setToastMessage({ type: "error", message: "Ocorreu um erro ao buscar os usuários, tente novamente" })
+        }
+        
         await new Promise((resolve) => setTimeout(resolve, 1000));
         setReload(false);
       })().catch(console.error);
     }
   }, [reload]);
   
-    const handleFilterClick = async () => {
-      rows = OGRows;
-      setReload(!reload);
-  
-      if (!nameFilter) return;
-  
-      rows = rows.filter(x => x.data[0].toString().toLowerCase().includes(nameFilter.toLowerCase()));
+  React.useEffect(() => {
+    if (isEdit) {
+      (async () => {
+        const build = data.find(x => x.id === buildId);
+        
+        if (build){
+          setName(build.nome)
+        }
+
+        setReload(false);
+      })().catch(console.error);
     }
+  }, [openDrawer]);
   
-    const handleAddBuildClick = async() => {
-      setNewlyOpened(false);
-      
-      if (!name) return false;
+  React.useEffect(() => {
+    DispatchToast(toastMessage);
+  }, [toastMessage])
   
-      if (!isEdit)
-        rows.push({
-          data: [ name ]
-        })
-      
-      setIsEdit(false);
-      handleCloseAddBuild();
-  
-      return true;
+  const handleFilterClick = async () => {
+    let addressData = data;
+
+    if (nameFilter) {
+      addressData = addressData.filter(x => x.nome.toString().toLowerCase().includes(nameFilter.toLowerCase()));
     }
 
-    const handleAddRoomClick = async() => {
-      setNewlyOpened(false);
-      
-      if (!name) return false;
-  
-      if (rows[0].subList?.rows)
-        rows[0].subList.rows.push([name])
-      
-      setIsEdit(false);
-      handleCloseAddBuild();
-  
-      return true;
+    setBuildRows(ParseToIRow(addressData));
+  }
+
+  const handleAddBuildClick = async() => {
+    setNewlyOpened(false);
+    
+    if (!name) return false;
+
+    if (!isEdit)
+      buildRows.push({
+        data: [ name ]
+      })
+    
+    setIsEdit(false);
+    handleCloseAddBuild();
+
+    return true;
+  }
+
+  const handleAddRoomClick = async() => {
+    setNewlyOpened(false);
+    
+    if (!name) return false;
+
+    if (buildRows[0].subList?.rows)
+      buildRows[0].subList.rows.push([name])
+    
+    setIsEdit(false);
+    handleCloseAddBuild();
+
+    return true;
+  }
+
+  const handleCloseAddBuild = () => {   
+    setName("");
+    setIsEdit(false);
+    setNewlyOpened(true);
+  }
+
+  const handleDeleteBuildClick = (row: IRow) => {
+    // rows = rows.filter(r => r.data[0] !== row.data[0])
+
+    setReload(true);
+  }
+
+  const handleDeleteRoomClick = (row: IRow) => {
+    if (buildRows[0].subList?.rows)
+      buildRows[0].subList.rows = buildRows[0].subList.rows.filter(r => r[0] !== row.data[0])
+
+    setReload(true);
+  }
+
+  const handleEditBuildAction = (row: IRow) => {
+    setBuildId(Number.parseInt(row.data[0].toString()))
+    setIsEdit(true);
+    setOpenDrawer(true);
+  }
+
+  const handleAddButtonClick = () => {
+    setOpenDrawer(true)    
+  }
+
+  const handleRoomsDialogClick = () => {
+    const build = data.find(x => x.id === buildId);
+    if (build?.rooms.length) {
+      setRoomRows(build.rooms.map(x => { return {data: [x.id, x.nome]} }))
     }
-  
-    const handleCloseAddBuild = () => {   
-      setName("");
-      setExtraInfos("");
-      setNewlyOpened(true);
-    }
-  
-    const handleDeleteBuildClick = (row: IRow) => {
-      rows = rows.filter(r => r.data[0] !== row.data[0])
-  
-      setReload(true);
-    }
-  
-    const handleDeleteRoomClick = (row: IRow) => {
-      if (rows[0].subList?.rows)
-        rows[0].subList.rows = rows[0].subList.rows.filter(r => r[0] !== row.data[0])
-  
-      setReload(true);
-    }
-  
-    const handleEditRoomAction = (row: IRow) => {
-      setName(row.data[0].toString());
-      setOpenDrawer(true);
-    }
-  
-    const handleAddButtonClick = () => {
-      setOpenDrawer(true)    
-    }
+
+    setOpenAddRoom(true);
+  }
 
   return (
     reload
@@ -171,12 +187,13 @@ export default function Rooms() {
           </div>
           <div className="room-tab-table">
             <Table
-              headers={['Nome']}
-              rows={rows}
+              headers={['ID', 'Nome']}
+              rows={buildRows}
               className="rooms-table"
               deleteAction={handleDeleteBuildClick}
-              editAction={handleEditRoomAction}
-              rowActions={rowActions(setOpenAddRoom)}
+              editAction={handleEditBuildAction}
+              rowActions={rowActions(handleRoomsDialogClick)}
+              rowClick={(row: IRow) => { setBuildId(Number.parseInt(row.data[0].toString())) }}
             />
           </div>
           <Drawer
@@ -198,15 +215,6 @@ export default function Rooms() {
                 error={!newlyOpened && !name}
                 helperText='É obrigatório informar o nome da categoria'
                 onChange={(event) => { setName(event.target.value) }}
-              />
-              <InputText
-                type='text'
-                placeholder='Informações extras'
-                value={extraInfos}
-                className='room-data-input'
-                onChange={(event) => { setExtraInfos(event.target.value) }}
-                multiline
-                defaultRows={10}
               />
               <Button 
                 className="save-button"
@@ -256,14 +264,16 @@ export default function Rooms() {
               </div>
               <div className={`add-room-dialog-content ${!openAddRoomForm ? "filled" : ""}`} >
                 <Table
-                  headers={['Nome']}
-                  rows={rows[0].subList?.rows?.map(x => { return { data: x.map((v, i) => i === 0 ? v : null ).filter(x => !!x) } as IRow }) || []}
+                  headers={['ID', 'Nome']}
+                  rows={roomRows}
                   className="rooms-table"
                   deleteAction={handleDeleteRoomClick}
+                  rowClick={(row: IRow) => { setRoomId(Number.parseInt(row.data[0].toString())) }}
                 />
               </div>
             </div>
           </Dialog>
+          <Toast />
         </div>
   )
 }
