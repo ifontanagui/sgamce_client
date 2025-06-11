@@ -9,12 +9,12 @@ export interface AddressData {
   nome: string
   rooms: RoomData[]
 }
-interface FindAddresssRowsReply {
+interface FindAddressRowsReply {
   success: boolean,
   data: AddressData[]
 }
 
-export async function FindAddressRows(): Promise<FindAddresssRowsReply> {
+export async function FindAddressRows(): Promise<FindAddressRowsReply> {
   const builds = [
     { id: 1, nome: 'Prédio 01', rooms: [ { id: 1, nome: 'Sala 01' }, { id: 2, nome: 'Laboratório 01' },{ id: 3, nome: 'Sala 02' }, { id: 4, nome: 'Laboratório 02' } ] },
     { id: 2, nome: 'Prédio 02', rooms: [ { id: 1, nome: 'Sala 01' }, { id: 2, nome: 'Laboratório 01' } ] },

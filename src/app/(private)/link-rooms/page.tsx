@@ -4,118 +4,55 @@ import "./style.css"
 import React from "react";
 import MultiTabs from "@/components/MultiTabs"
 import Table, { IRow } from "@/components/Table";
-import { Chip, Dialog, IconButton } from "@mui/material";
-import { AddCircleOutline, AddToQueue, GroupAdd } from "@mui/icons-material";
+import { Chip, Dialog, Drawer, IconButton } from "@mui/material";
+import { AddCircleOutline, GroupAdd, AddToQueue } from "@mui/icons-material";
 import InputText from "@/components/InputText";
 import Button from "@/components/Button";
 import Combo from "@/components/Combo";
+import { DispatchToast, DispatchToastProps } from "@/components/Toast";
+import { FindBuildsRows, FindRoomsRows, LinkUserData, ParseToBuildIRow, ParseToRoomIRow, ParseToUserIRow, RoomData } from "@/services/links-service";
+import { FindUsersRows } from "@/services/users-service";
+import { EquipmentData, FindEquipmentsRows } from "@/services/equipments-service";
 
-const OGRows = [
-  {
-    row: [{ 
-      data: ['201'], 
-      subList: { 
-        title: "Máquinas", 
-        headers: [ "Equipamento", "Nro. Identificação", "Nro. Identificação" ], 
-        rows: [
-          ["Computador", 123, 123], ["Computador", 456, 456], ["Computador", 789, 789], ["Computador", 987, 987], ["Computador", 654, 654], ["Computador", 321, 321],
-          ["Computador", 123, 123], ["Computador", 456, 456], ["Computador", 789, 789], ["Computador", 987, 987], ["Computador", 654, 654], ["Computador", 321, 321],
-          ["Computador", 123, 123], ["Computador", 456, 456], ["Computador", 789, 789], ["Computador", 987, 987], ["Computador", 654, 654], ["Computador", 321, 321],
-          ["Computador", 123, 123], ["Computador", 456, 456], ["Computador", 789, 789], ["Computador", 987, 987], ["Computador", 654, 654], ["Computador", 321, 321],
-          ["Computador", 123, 123], ["Computador", 456, 456], ["Computador", 789, 789], ["Computador", 987, 987], ["Computador", 654, 654], ["Computador", 321, 321],
-        ] 
-      },
-    },
-    {data: ['202']},
-    {data: ['203']},
-    {data: ['204']},
-    {data: ['205']},
-    {data: ['206']},
-    {data: ['207']},
-    {data: ['208']},
-    {data: ['209']}],
-  },
-  {
-    row: []
-  },
-  {
-    row: []
-  },
-  {
-    row: []
-  },
-  {
-    row: []
-  },
-  {
-    row: []
-  },
-  {
-    row: []
-  },
-  {
-    row: []
-  }
-] as { row: IRow[] }[];
-const rows = OGRows;
-
-const Builds = [
-  { data: ['Bloco 01Bloco 01Bloco 01Bloco 01Bloco 01']},
-  { data: ['Bloco 02'] },
-  { data: ['Bloco 03'] },
-  { data: ['Bloco 04'] },
-  { data: ['Bloco 05'] },
-  { data: ['Bloco 06'] },
-  { data: ['Bloco 07'] },
-  { data: ['Bloco 08'] },
-  { data: ['Bloco 09'] },
-  { data: ['Bloco 10'] },
-  { data: ['Bloco 11'] },
-  { data: ['Bloco 12'] },
-  { data: ['Bloco 13'] },
-  { data: ['Bloco 14'] },
-] as IRow[]
-
-const OGUsers = [
-  { data: ['Usuário 01', 'usuqrio01@email.com']},
-  { data: ['Usuário 02', 'usuqrio02@email.com'] },
-  { data: ['Usuário 03', 'usuqrio03@email.com'] },
-  { data: ['Usuário 04', 'usuqrio04@email.com'] },
-  { data: ['Usuário 05', 'usuqrio05@email.com'] },
-  { data: ['Usuário 06', 'usuqrio06@email.com'] },
-  { data: ['Usuário 07', 'usuqrio07@email.com'] },
-  { data: ['Usuário 08', 'usuqrio08@email.com'] },
-  { data: ['Usuário 09', 'usuqrio09@email.com'] },
-  { data: ['Usuário 10', 'usuqrio10@email.com'] },
-  { data: ['Usuário 11', 'usuqrio11@email.com'] },
-  { data: ['Usuário 12', 'usuqrio12@email.com'] },
-  { data: ['Usuário 13', 'usuqrio13@email.com'] },
-  { data: ['Usuário 14', 'usuqrio14@email.com'] },
-] as IRow[]
-let users = OGUsers;
-
-function rowActions(
-  onClickActionEquipment:  React.Dispatch<React.SetStateAction<boolean>>,
-  onClickActionUser:  React.Dispatch<React.SetStateAction<boolean>>
+function roomRowActions(
+  onClickActionUser:  () => void
 ) {
   return (
     <div className="add-equipment-action">
-      <IconButton onClick={() => onClickActionEquipment(true)}>
-        <AddToQueue className="add-equipment-action-icon"/>
-      </IconButton>
-      <IconButton onClick={() => onClickActionUser(true)}>
+      <IconButton onClick={() => onClickActionUser()}>
         <GroupAdd className="add-users-action-icon"/>
       </IconButton>
     </div>
   )
 }
 
+function equipmentRowActions(
+  onClickActionUser:  () => void
+) {
+  return (
+    <div className="add-equipment-action">
+      <IconButton onClick={() => onClickActionUser()}>
+        <AddToQueue className="add-users-action-icon"/>
+      </IconButton>
+    </div>
+  )
+}
+
 export default function Rooms() {
+  // const [buildsData, setBuildsData] = React.useState([] as BuildData[]);
+  const [roomsData, setRoomsData] = React.useState([] as RoomData[]);
+  const [usersData, setUsersData] = React.useState([] as LinkUserData[])
+  const [equipmentsData, setEquipmentsData] = React.useState([] as EquipmentData[])
+  const [buildRows, setBuildRows] = React.useState([] as IRow[]);
+  const [roomRows, setRoomRows] = React.useState([] as IRow[]);
+  const [equipmentRows, setEquipmentRows] = React.useState([] as IRow[]);
+  const [usersRows, setUsersRows] = React.useState([] as IRow[]);
+  
   const [reload, setReload] = React.useState(true);
+  const [buildId, setBuildId ] = React.useState(0);
+  const [roomId, setRoomId ] = React.useState(0);
   const [curTab, setCurTab ] = React.useState(0);
-  const [curBuildRow, setCurBuildRow ] = React.useState(-1);
   const [curRoomRow, setCurRoomRow ] = React.useState(-1);
-  const [openAddMachine, setOpenAddMachine] = React.useState(false);
   const [openAddMachineForm, setOpenAddMachineForm] = React.useState(false);
   const [newlyOpened, setNewlyOpened] = React.useState(true);
   const [assetNumber, setAssetNumber] = React.useState(0);
@@ -123,24 +60,74 @@ export default function Rooms() {
   const [equipment, setEquipment] = React.useState("")
   const [openAddUser, setOpenAddUser] = React.useState(false);
   const [openAddUserForm, setOpenAddUserForm] = React.useState(false);
-
+  const [toastMessage, setToastMessage] = React.useState({type: "success", message: ""} as DispatchToastProps);
     
   React.useEffect(() => {
     if (reload) {
       (async () => {
+        Promise.all([
+          FindBuildsRows(),
+          FindUsersRows(),
+          FindEquipmentsRows()
+        ])
+          .then(([addressRowsReply, users, equipments]) => {
+            setBuildRows(ParseToBuildIRow(addressRowsReply.data));
+            setUsersData(users.data);
+            setEquipmentsData(equipments.data);
+          })
+          .catch(() => {
+            setToastMessage({ type: "error", message: "Ocorreu um erro ao buscar os dados, tente novamente" })
+          });
+
         await new Promise((resolve) => setTimeout(resolve, 1000));
         setReload(false);
       })().catch(console.error);
     }
   }, [reload]);
+
+  React.useEffect(() => {
+    (async () => {
+      if (curTab === 0) {
+        setRoomsData([])
+        setRoomRows([])
+      }
+      if (curTab === 1) {
+        const rooms = await FindRoomsRows(buildId);
+        setRoomsData(rooms.data)
+        setRoomRows(ParseToRoomIRow(rooms.data))
+          
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    })().catch(console.error);
+  }, [curTab]);
+
+  React.useEffect(() => {
+    (async () => {
+      if (openAddUser) {
+        const room = roomsData.find(x => x.buildId === buildId && x.id === roomId)
+        if (room?.users.length) {
+          setUsersRows(ParseToUserIRow(room.users));
+        }
+        else {
+          setUsersRows([])
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    })().catch(console.error);
+  }, [openAddUser]);
+    
+  React.useEffect(() => {
+    DispatchToast(toastMessage);
+  }, [toastMessage])
   
   const handleAddMachineClick = async() => {
     setNewlyOpened(false);
     
     if (!assetNumber || !identifierNumber || !equipment) return false;
 
-    if ((rows[curBuildRow]?.row)[curRoomRow]?.subList?.rows)
-      rows[curBuildRow].row[curRoomRow].subList.rows.push([equipment, assetNumber, identifierNumber])
+    // if ((rows[curBuildRow]?.row)[curRoomRow]?.subList?.rows)
+    //   rows[curBuildRow].row[curRoomRow].subList.rows.push([equipment, assetNumber, identifierNumber])
     
     handleCloseAddEquipment();
 
@@ -155,8 +142,8 @@ export default function Rooms() {
   }
     
   const handleDeleteMachineClick = (row: IRow) => {
-    if ((rows[curBuildRow]?.row)[curRoomRow]?.subList?.rows)
-      rows[curBuildRow].row[curRoomRow].subList.rows = rows[curBuildRow].row[curRoomRow].subList.rows.filter(r => r[1] !== row.data[1])
+    // if ((rows[curBuildRow]?.row)[curRoomRow]?.subList?.rows)
+    //   rows[curBuildRow].row[curRoomRow].subList.rows = rows[curBuildRow].row[curRoomRow].subList.rows.filter(r => r[1] !== row.data[1])
 
     setReload(true);
   }
@@ -166,7 +153,7 @@ export default function Rooms() {
     
     if (!equipment) return false;
 
-    users.push({data: [equipment]})
+    // users.push({data: [equipment]})
     
     handleCloseAddEquipment();
 
@@ -174,7 +161,7 @@ export default function Rooms() {
   }
 
   const handleDeleteUserClick = (row: IRow) => {
-    users = users.filter(x => x.data[1] !== row.data[1]);
+    // users = users.filter(x => x.data[1] !== row.data[1]);
     setReload(true);
   }
 
@@ -187,95 +174,67 @@ export default function Rooms() {
         {
           header: 'Blocos', content: 
           <div className="room-tab">
-            {curBuildRow !== -1 && <Chip className="room-chip" label={Builds[curBuildRow].data[0]} variant="outlined" />}
+            {!!buildId && <Chip className="room-chip" label={buildRows.find(x => x.data[0] === buildId)?.data[1]} variant="outlined" />}
             <div className="room-tab-table">
               <Table
-                headers={['Bloco']}
-                rows={Builds}
+                headers={['ID', 'Prédio']}
+                rows={buildRows}
                 className="rooms-table"
-                rowClick={(row: IRow, index: number) => {setCurBuildRow(index)}}
+                rowClick={(row: IRow) => {
+                  setBuildId(Number.parseInt(row.data[0].toString()));setRoomId(0);
+                }}
               />
             </div>
           </div>
         },
         { header: 'Salas', content:
           <div className="room-tab">
-            {curBuildRow !== -1 && <Chip className="room-chip" label={Builds[curBuildRow].data[0]} variant="outlined" />}
+            {!!buildId && <Chip className="room-chip" label={buildRows.find(x => x.data[0] === buildId)?.data[1]} variant="outlined" />}
+            {!!roomId && <Chip className="room-chip" label={roomRows.find(x => x.data[0] === roomId)?.data[1]} variant="outlined" />}
             <div className="room-tab-table">
               <Table
-                headers={['Sala']}
-                rows={rows[curBuildRow]?.row || [] as IRow[]}
+                headers={['ID', 'Sala/Laboratório']}
+                rows={roomRows}
                 className="rooms-table"
-                rowClick={(row: IRow, index: number) => {setCurRoomRow(index)}}
-                rowActions={rowActions(setOpenAddMachine, setOpenAddUser)}
+                rowClick={(row: IRow) => {
+                  const id = Number.parseInt(row.data[0].toString());
+                  setRoomId(id);
+
+                  const room = roomsData.find(x => x.buildId === buildId && x.id === id);
+                  if (room?.equipments.length) {
+                    setEquipmentRows( room.equipments.map(x => { return { data: [ x.equipamento, x.identificacao, x.numero_patrimonio ] } as IRow}))
+                  }
+                  else {
+                    setEquipmentRows([]);
+                  }
+                }}
+                rowActions={roomRowActions(() => {
+                  setOpenAddUser(true);
+                  setOpenAddUserForm(false);
+                })}
               />
             </div>
           </div>
         },
-      ]}/>
-      <Dialog
-        open={openAddMachine}
-        onClose={() => setOpenAddMachine(false)}
-        scroll='paper'
-        maxWidth={"xl"}
-        fullWidth
-      >
-        <div className='add-machine-dialog'>
-          <div className="add-machine-dialog-header">
-            <strong className="add-machine-dialog-header-comp">Vincular Equipamentos</strong>
-            <IconButton onClick={() => {setOpenAddMachineForm(!openAddMachineForm)}}>
-              <AddCircleOutline className='add-machine-dialog-header-comp' />
-            </IconButton>
-          </div>
-          <div className={`add-machine-dialog-header-form-${openAddMachineForm ? "open" : "close"}`}>
-            <InputText
-              type='text'
-              placeholder='Nro. de Identificação'
-              value={assetNumber}
-              required
-              error={!newlyOpened && !assetNumber}
-              helperText="É obrigatório informar o nro. de identificação"
-              onChange={(event) => { setAssetNumber(Number.parseInt(event.target.value)) }}
-              className="input-equipment-input"
-            />
-            <InputText
-              type='text'
-              placeholder='Nro. de Patrimonio'
-              value={identifierNumber}
-              required
-              error={!newlyOpened && !identifierNumber}
-              helperText="É obrigatório informar o nro. de patrimonio"
-              onChange={(event) => { setIdentifierNumber(Number.parseInt(event.target.value)) }}
-              className="input-equipment-input"
-            />   
-            <div className='equipments-combo'>
-              <Combo 
-                title="Equipamentos" 
-                value={equipment}
-                onChange={(value: string | number) => setEquipment(value.toString())}
-                valuesList={[{description: "Computador", value: "Computador"}, {description: "Vidraria", value: "Vidraria"}, {description: "Balança", value: "Balança"}]}
-                emptyValue 
-                required
+        { header: 'Equipamentos', content:
+          <div className="room-tab">
+            {!!buildId && <Chip className="room-chip" label={buildRows.find(x => x.data[0] === buildId)?.data[1]} variant="outlined" />}
+            {!!roomId && <Chip className="room-chip" label={roomRows.find(x => x.data[0] === roomId)?.data[1]} variant="outlined" />}
+            <div className="room-tab-table">
+              <Table
+                headers={['Equipamento', 'Nro. Identificação', 'Nro. Patrimonio']}
+                rows={equipmentRows}
+                className="rooms-table"
+                rowClick={(row: IRow, index: number) => {setCurRoomRow(index)}}
+                rowActions={equipmentRowActions(() => {
+                  setOpenAddMachineForm(true);
+                })}
+                deleteAction={handleDeleteMachineClick}
               />
-            </div>             
-            <Button 
-              className="save-machine-button"
-              onClick={async () => {
-                await handleAddMachineClick();
-              }} 
-              textContent='Salvar'
-            />
+            </div>
           </div>
-          <div className={`add-machine-dialog-content ${!openAddMachineForm ? "filled" : ""}`} >
-            <Table
-              headers={['Equipamento', 'Nro. Identificação', 'Nro Patrimonio']}
-              rows={(rows[curBuildRow]?.row)[curRoomRow]?.subList?.rows?.map(x => { return { data: x.map((v) => v ) } as IRow }) || []}
-              className="machines-table"
-              deleteAction={handleDeleteMachineClick}
-            />
-          </div>
-        </div>
-      </Dialog>
+        },
+      ]}/>      
       <Dialog
         open={openAddUser}
         onClose={() => setOpenAddUser(false)}
@@ -296,7 +255,7 @@ export default function Rooms() {
                 title="Usuários" 
                 value={equipment}
                 onChange={(value: string | number) => setEquipment(value.toString())}
-                valuesList={[{description: "Fulano", value: "Fulano"}, {description: "Ciclano", value: "Ciclano"}, {description: "Beltrano", value: "Beltrano"}]}
+                valuesList={usersData.map(x => { return { value: x.id, description: x.nome }})}
                 emptyValue 
                 required
                 error={!newlyOpened && !equipment}
@@ -313,14 +272,60 @@ export default function Rooms() {
           </div>
           <div className={`add-user-dialog-content ${!openAddUserForm ? "filled" : ""}`} >
             <Table
-              headers={['Nome', "Email"]}
-              rows={users}
+              headers={['ID', "Nome"]}
+              rows={usersRows}
               className="user-table"
               deleteAction={handleDeleteUserClick}
             />
           </div>
         </div>
-      </Dialog>
+      </Dialog> 
+      <Drawer
+        anchor='right'
+        open={openAddMachineForm}
+        onClose={() => setOpenAddMachineForm(false)}
+      >
+        <div className='add-machine-drawer'>
+          <strong className='add-machine-drawer-title'>Cadastrar Equipamento</strong>
+          <InputText
+            type='text'
+            placeholder='Nro. de Identificação'
+            value={assetNumber}
+            required
+            error={!newlyOpened && !assetNumber}
+            helperText="É obrigatório informar o nro. de identificação"
+            onChange={(event) => { setAssetNumber(Number.parseInt(event.target.value)) }}
+            className="input-equipment-input"
+          />
+          <InputText
+            type='text'
+            placeholder='Nro. de Patrimonio'
+            value={identifierNumber}
+            required
+            error={!newlyOpened && !identifierNumber}
+            helperText="É obrigatório informar o nro. de patrimonio"
+            onChange={(event) => { setIdentifierNumber(Number.parseInt(event.target.value)) }}
+            className="input-equipment-input"
+          />   
+          <div className='equipments-combo'>
+            <Combo 
+              title="Equipamentos" 
+              value={equipment}
+              onChange={(value: string | number) => setEquipment(value.toString())}
+              valuesList={equipmentsData.map(x => { return { value: x.id, description: x.equipamento }})}
+              emptyValue 
+              required
+            />
+          </div>             
+          <Button 
+            className="save-button"
+            onClick={async () => {
+              await handleAddMachineClick();
+            }} 
+            textContent='Salvar'
+          />
+        </div>
+      </Drawer>
     </div>
   )
 }
