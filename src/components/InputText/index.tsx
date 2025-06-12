@@ -1,8 +1,8 @@
 "use client"
 
-import React from "react";
 import "./style.css"
-import { Box, Icon, IconButton, TextField } from "@mui/material";
+import React from "react";
+import { Box, Icon, IconButton, InputAdornment, TextField } from "@mui/material";
 import { AccountCircle, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 
 interface InputTextProps {
@@ -12,7 +12,7 @@ interface InputTextProps {
   icon?: React.ReactNode; 
   placeholder: string;
   required?: boolean
-  type: "email" | "number" | "password" | "text"
+  type: "email" | "number" | "password" | "text" | "amount"
   value: string | number;
   multiline?: boolean
   defaultRows?: number
@@ -70,6 +70,7 @@ export default function InputText(props: InputTextProps) {
                 </IconButton>
               )
             ),
+            startAdornment: props.type === "amount" && <InputAdornment position="start">$</InputAdornment>
           },
         }}
       />
