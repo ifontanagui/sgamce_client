@@ -1,0 +1,18 @@
+
+.skeleton {
+  .skeleton-tabs {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 20px;
+    
+    .first {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+
+  .skeleton-tab {
+    border-top-left-radius: 0;
+  }
+}
