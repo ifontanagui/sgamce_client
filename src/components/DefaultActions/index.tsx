@@ -7,11 +7,11 @@ import { Dialog, IconButton } from '@mui/material';
 import Button from '../Button';
 
 interface DefaultActionsProps {
-  refreshAction: React.MouseEventHandler<HTMLButtonElement>,
-  filtersDialog: ReactElement;
+  refreshAction?: React.MouseEventHandler<HTMLButtonElement>,
+  filtersDialog?: ReactElement;
   filtersDialogClassName?: string;
-  filterAction: React.MouseEventHandler<HTMLButtonElement>
-  addAction:  () => void
+  filterAction?: React.MouseEventHandler<HTMLButtonElement>
+  addAction?:  () => void
 }
 
 export default function DefaultActions(props: DefaultActionsProps) {
@@ -19,15 +19,19 @@ export default function DefaultActions(props: DefaultActionsProps) {
 
   return (
     <div className='default-actions'>
-      <IconButton onClick={props.refreshAction}>
+      {props.refreshAction && <IconButton onClick={props.refreshAction}>
         <RefreshOutlined className='default-actions-icon' />
-      </IconButton>
-      <IconButton onClick={() => setOpenDialog(true)}>
+      </IconButton>}
+      {props.filterAction && props.filtersDialog && <IconButton onClick={() => setOpenDialog(true)}>
         <FilterList className='default-actions-icon' />
-      </IconButton>
-      <IconButton onClick={() => props.addAction()}>
+      </IconButton>}
+      {props.addAction && <IconButton onClick={() => {
+        if (props.addAction) {
+          props.addAction();
+        }
+      }}>
         <AddCircleOutline className='default-actions-icon' />
-      </IconButton>
+      </IconButton>}
       <Dialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
@@ -41,7 +45,10 @@ export default function DefaultActions(props: DefaultActionsProps) {
           <div className='filter-dialog-execute-button'>
             <Button 
               onClick={(event) => {
-                props.filterAction(event);
+                if (props.filterAction) {
+                  props.filterAction(event);
+                }
+                
                 setOpenDialog(false);
               }} 
               textContent='Filtrar'
