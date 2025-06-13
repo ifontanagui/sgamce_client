@@ -70,7 +70,7 @@ export default function InputText(props: InputTextProps) {
                 </IconButton>
               )
             ),
-            startAdornment: props.type === "amount" && <InputAdornment position="start">$</InputAdornment>
+            startAdornment: props.type === "amount" && <InputAdornment position="start">R$</InputAdornment>
           },
         }}
       />
