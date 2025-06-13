@@ -13,7 +13,7 @@ export default function Login() {
   const router = useRouter();
   
   const [loading, setLoading] = React.useState(false);
-  const [email, setEmail] = React.useState("hbh@email.com");
+  const [email, setEmail] = React.useState("admin@email.com");
   const [emailError, setEmailError] = React.useState(false);
   const [password, setPassword] = React.useState("");
   const [passwordError, setPasswordError] = React.useState(false);

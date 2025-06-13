@@ -4,7 +4,7 @@ import React from "react";
 import "./style.css"
 import { useRouter } from 'next/navigation'
 import { IconButton, Menu, MenuItem } from "@mui/material";
-import { AccountCircle, Place, PrecisionManufacturing, KeyboardDoubleArrowDown, Category, Cable } from "@mui/icons-material";
+import { AccountCircle, Place, PrecisionManufacturing, KeyboardDoubleArrowDown, Category, Cable, Event } from "@mui/icons-material";
 import { deleteCookie, getCookie } from "cookies-next";
 
 const menuItems = [
@@ -12,6 +12,7 @@ const menuItems = [
   { description: "Equipamentos", url: "/equipments", icon: <PrecisionManufacturing className="private-layout-header-sub-menu-list-item-icon"/>, onlyAdmin: false },
   { description: "Salas e Laboratórios", url: "/address", icon: <Place className="private-layout-header-sub-menu-list-item-icon"/>, onlyAdmin: true },
   { description: "Vincular à Salas", url: "/link-rooms", icon: <Cable className="private-layout-header-sub-menu-list-item-icon"/>, onlyAdmin: false },
+  { description: "Eventos e Certificados", url: "/events-certificates", icon: <Event className="private-layout-header-sub-menu-list-item-icon"/>, onlyAdmin: false },
 ] as const;
 
 
