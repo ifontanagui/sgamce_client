@@ -65,7 +65,6 @@ export async function FindEventsRows(equipmentId: number):Promise<FindEventsRows
 }
 
 export function ParseToEventIRow(data: EventData[]): IRow[] {
-console.log(data[0].certificado);
 
   return data.map(x => {
     return {

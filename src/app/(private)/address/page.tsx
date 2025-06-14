@@ -9,7 +9,7 @@ import DefaultSkeleton from "@/components/DefaultSkeleton";
 import DefaultActions from "@/components/DefaultActions";
 import InputText from "@/components/InputText";
 import Button from "@/components/Button";
-import { AddressData, FindAddressRows, ParseToIRow } from "@/services/address-service";
+import { AddressData, CreateBuild, CreateRoom, EditBuild, FindBuildAddressRows, ParseToIRow, ParseToRoomIRow } from "@/services/address-service";
 import Toast, { DispatchToastProps, DispatchToast } from "@/components/Toast";
 
 function rowActions(onClickAction:  React.Dispatch<React.SetStateAction<boolean>>) {
@@ -49,8 +49,9 @@ export default function Address() {
   
   const [reload, setReload] = React.useState(true);
   const [buildId, setBuildId] = React.useState(0);
-  const [roomId, setRoomId] = React.useState(0);
   const [name, setName] = React.useState("");
+  const [roomNumber, setRoomNumber] = React.useState(null as number | null);
+  const [roomCode, setRoomCode] = React.useState("")
   const [nameFilter, setNameFilter] = React.useState("");
   const [newlyOpened, setNewlyOpened] = React.useState(true);
   const [openDrawer, setOpenDrawer] = React.useState(false);
@@ -62,15 +63,21 @@ export default function Address() {
   React.useEffect(() => {
     if (reload) {
       (async () => {
-        const usersRowsReply = await FindAddressRows();
-        setData(usersRowsReply.data);
-        setBuildRows(ParseToIRow(usersRowsReply.data));
+        const addressRowsReply = await FindBuildAddressRows();
 
-        if (!usersRowsReply.success) {
+        setData(addressRowsReply.data);
+        setBuildRows(ParseToIRow(addressRowsReply.data));
+        
+        if (!addressRowsReply.success) {
           setToastMessage({ type: "error", message: "Ocorreu um erro ao buscar os usuários, tente novamente" })
         }
         
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        if (buildId) {
+          const build = addressRowsReply.data.find(x => x.id === buildId)
+
+          setRoomRows(ParseToRoomIRow(build?.rooms || []));
+        }
+
         setReload(false);
       })().catch(console.error);
     }
@@ -109,29 +116,54 @@ export default function Address() {
     
     if (!name) return false;
 
-    if (!isEdit)
-      buildRows.push({
-        data: [ name ]
-      })
-    
-    setIsEdit(false);
-    handleCloseAddBuild();
+    if (isEdit) {
+      const response = await EditBuild(buildId, name);
+      if (response.success) {
+        setReload(true);
+        setIsEdit(false);
+        handleCloseAddBuild();
 
-    return true;
+        setToastMessage({type: "success", message:  "Categoria editada com sucesso!"})
+      }
+      else {
+        setToastMessage({type: "error", message:  response.message || "Erro ao editar a categoria, tente novamente"});
+      }
+
+      return response.success;
+    }
+    else {
+      const response = await CreateBuild(name);
+      if (response.success) {
+        setReload(true);
+        setIsEdit(false);
+        handleCloseAddBuild();
+
+        setToastMessage({type: "success", message:  "Categoria criada com sucesso"});
+      }
+      else {
+        setToastMessage({type: "error", message:  response.message || "Erro ao cadastrar a categoria, tente novamente"});
+      }
+
+      return response.success;
+    }
   }
 
   const handleAddRoomClick = async() => {
-    setNewlyOpened(false);
-    
-    if (!name) return false;
 
-    if (buildRows[0].subList?.rows)
-      buildRows[0].subList.rows.push([name])
+    if (!name || !roomCode || !roomNumber) return false;
     
-    setIsEdit(false);
-    handleCloseAddBuild();
+    const response = await CreateRoom(name, roomCode, buildId, roomNumber || 0);
+    if (response.success) {
+      setName("");
+      setRoomCode("");
+      setRoomNumber(null)
+      setReload(true);
+    }    
+    else {
+      setToastMessage({type: "error", message:  response.message || "Erro ao cadastrar a sala/laboratório, tente novamente"});
+    }
 
-    return true;
+    return response.success;
   }
 
   const handleCloseAddBuild = () => {   
@@ -141,6 +173,7 @@ export default function Address() {
   }
 
   const handleDeleteBuildClick = (row: IRow) => {
+    console.log('row: ', row);
     // rows = rows.filter(r => r.data[0] !== row.data[0])
 
     setReload(true);
@@ -160,16 +193,8 @@ export default function Address() {
   }
 
   const handleAddButtonClick = () => {
-    setOpenDrawer(true)    
-  }
-
-  const handleRoomsDialogClick = () => {
-    const build = data.find(x => x.id === buildId);
-    if (build?.rooms.length) {
-      setRoomRows(build.rooms.map(x => { return {data: [x.id, x.nome]} }))
-    }
-
-    setOpenAddRoom(true);
+    setOpenDrawer(true)
+    setIsEdit(false);
   }
 
   return (
@@ -177,7 +202,7 @@ export default function Address() {
       ? <DefaultSkeleton />
       : <div className="rooms">
           <div className="rooms-header">
-            <strong className='rooms-header-title'>Prédios</strong>
+            <strong className='rooms-header-title'>Blocos</strong>
             <DefaultActions
               refreshAction={handleFilterClick}
               filtersDialog={FilterDialog({nameFilter, setNameFilter})}
@@ -192,8 +217,15 @@ export default function Address() {
               className="rooms-table"
               deleteAction={handleDeleteBuildClick}
               editAction={handleEditBuildAction}
-              rowActions={rowActions(handleRoomsDialogClick)}
-              rowClick={(row: IRow) => { setBuildId(Number.parseInt(row.data[0].toString())) }}
+              rowActions={rowActions(() => setOpenAddRoom(true))}
+              rowClick={(row: IRow) => { 
+                const id = Number.parseInt(row.data[0].toString())
+                const build = data.find(x => x.id === id)
+
+                setRoomRows(ParseToRoomIRow(build?.rooms || []));
+
+                setBuildId(id);              
+              }}
             />
           </div>
           <Drawer
@@ -205,7 +237,7 @@ export default function Address() {
             }}
           >
             <div className='room-drawer'>
-              <strong className='room-drawer-title'>Cadastrar Prédio</strong>
+              <strong className='room-drawer-title'>Cadastrar Bloco</strong>
               <InputText
                 type='text'
                 placeholder='Nome'
@@ -229,29 +261,54 @@ export default function Address() {
           </Drawer>
           <Dialog
             open={openAddRoom}
-            onClose={() => setOpenAddRoom(false)}
+            onClose={() => {
+              setOpenAddRoom(false)
+              setOpenAddRoomForm(false) 
+            }}
             scroll='paper'
             maxWidth={"xl"}
             fullWidth
           >
             <div className='add-room-dialog'>
               <div className="add-room-dialog-header">
-                <strong className="add-room-dialog-header-comp">Salas e Laboratórios do Prédio 1</strong>
+                <strong className="add-room-dialog-header-comp">Salas/Laboratórios do Bloco {data.find(x => x.id === buildId)?.nome}</strong>
                 <IconButton onClick={() => {setOpenAddRoomForm(!openAddRoomForm)}}>
                   <AddCircleOutline className='add-room-dialog-header-comp' />
                 </IconButton>
               </div>
               <div className={`add-room-dialog-header-form-${openAddRoomForm ? "open" : "close"}`}>
-                <InputText
-                  type='text'
-                  placeholder='Nome da Sala/Laboratório'
-                  value={name}
-                  required
-                  error={!newlyOpened && !name}
-                  helperText="É obrigatório informar o nome da sala/laboratório"
-                  onChange={(event) => { setName(event.target.value) }}
-                />
-                
+                <div className="add-room-dialog-header-form-inputs">
+                  <InputText
+                    type='text'
+                    className="input-room-name"
+                    placeholder='Nome'
+                    value={name}
+                    required
+                    error={!newlyOpened && !name}
+                    helperText="É obrigatório informar o nome da sala/laboratório"
+                    onChange={(event) => { setName(event.target.value) }}
+                  />
+                  <div className="add-room-dialog-header-form-inputs-row">
+                    <InputText
+                      type='text'
+                      placeholder='Sigla'
+                      value={roomCode}
+                      required
+                      error={!newlyOpened && !roomCode}
+                      helperText="É obrigatório informar a sigla da sala/laboratório"
+                      onChange={(event) => { setRoomCode(event.target.value) }}
+                      />
+                    <InputText
+                      type='text'
+                      placeholder='Nro. da Sala'
+                      value={roomNumber || ""}
+                      required
+                      error={!newlyOpened && !roomNumber}
+                      helperText="É obrigatório informar o número da sala"
+                      onChange={(event) => { setRoomNumber(Number.parseInt(event.target.value)) }}
+                      />
+                  </div>
+                </div>                
                 <Button 
                   className="save-room-button"
                   onClick={async () => {
@@ -264,11 +321,10 @@ export default function Address() {
               </div>
               <div className={`add-room-dialog-content ${!openAddRoomForm ? "filled" : ""}`} >
                 <Table
-                  headers={['ID', 'Nome']}
+                  headers={["ID", "Sigla", "Nome", "Sala"]}
                   rows={roomRows}
                   className="rooms-table"
                   deleteAction={handleDeleteRoomClick}
-                  rowClick={(row: IRow) => { setRoomId(Number.parseInt(row.data[0].toString())) }}
                 />
               </div>
             </div>

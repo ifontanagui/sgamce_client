@@ -50,9 +50,30 @@
     justify-content: flex-start;
     padding: 0 10px 10px 10px;
     align-items: center;
+    flex-direction: column;
+
+    .add-room-dialog-header-form-inputs {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      justify-content: flex-start;
+
+      .input-room-name {
+        width: 100%;
+      }
+
+      .add-room-dialog-header-form-inputs-row {
+        width: 90%;
+        justify-content: flex-start;
+        display: flex;
+      }
+    }
 
     .save-room-button {
       height: 50px;
+      width: 81%;
+      margin-top: 5px;
     }
   }
 
@@ -68,7 +89,7 @@
     align-items: center;
     justify-content: flex-start;
     flex-direction: column;
-    height: 80%;
+    height: 65%;
   }
 
   .filled {

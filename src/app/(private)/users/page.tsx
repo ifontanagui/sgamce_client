@@ -79,7 +79,7 @@ export default function Users() {
         setReload(false);
       })().catch(console.error);
     }
-  }, [openDrawer]);
+  }, [data, id, isEdit, openDrawer]);
     
   React.useEffect(() => {
     DispatchToast(toastMessage);
