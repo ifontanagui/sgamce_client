@@ -197,6 +197,13 @@ export default function Address() {
     setIsEdit(false);
   }
 
+  const handleRefreshEquipmentClick = async() => {
+    setNameFilter("");
+    setReload(true);
+
+    return true;
+  }
+
   return (
     reload
       ? <DefaultSkeleton />
@@ -204,7 +211,7 @@ export default function Address() {
           <div className="rooms-header">
             <strong className='rooms-header-title'>Blocos</strong>
             <DefaultActions
-              refreshAction={handleFilterClick}
+              refreshAction={handleRefreshEquipmentClick}
               filtersDialog={FilterDialog({nameFilter, setNameFilter})}
               filterAction={handleFilterClick}
               addAction={() => {handleAddButtonClick()}}

@@ -69,6 +69,7 @@ export default function Equipments() {
   const [extraInfos, setExtraInfos] = React.useState("");
   const [calibrationFrequency, setCalibrationFrequency] = React.useState(0);
   const [maintenanceFrequency, setMaintenanceFrequency] = React.useState(0);
+  const [warningTimeForCalibration, setWarningTimeForCalibration]  = React.useState(0);
   const [analogDigital, setAnalogDigital] = React.useState("D");
   const [nameFilter, setNameFilter] = React.useState("");
   const [manufacturerCompanyFilter, setManufacturerCompanyFilter] = React.useState("");
@@ -106,11 +107,12 @@ export default function Equipments() {
           setName(equipment.equipamento)
           setManufacturerCompany(equipment.marca);
           setDescription(equipment.identificacao)
-          setCategory(equipment.id_categoria?.toString() || "");
+          setCategory(equipment.id_categoria?.id?.toString() || "");
           setCalibrationFrequency(equipment.periodicidade_calibracao);
           setMaintenanceFrequency(equipment.periodicidade_manutencao);
           setExtraInfos(equipment.criterio_aceitacao_calibracao)
           setAnalogDigital(equipment.tipo);
+          // setWarningTimeForCalibration(equipment.aviso_renovacao_calibracao)
         }
 
         setReload(false);
@@ -133,7 +135,7 @@ export default function Equipments() {
       equipmentsRows = equipmentsRows.filter(x => x.marca.toString().toLowerCase().includes(manufacturerCompanyFilter.toLowerCase()));
 
     if (!!categoryFilter)
-      equipmentsRows = equipmentsRows.filter(x => x.id_categoria?.toString().toLowerCase().includes(categoryFilter.toLowerCase()));
+      equipmentsRows = equipmentsRows.filter(x => x.id_categoria?.id?.toString().toLowerCase().includes(categoryFilter.toLowerCase()));
   
     setRows(ParseToIRow(equipmentsRows));
   }
@@ -164,7 +166,7 @@ export default function Equipments() {
     if (isEdit){
       const numero_patrimonio = data.find(x => x.id === id)?.numero_patrimonio;
 
-      const response = await EditEquipment(id, name, description, manufacturerCompany, Number(category), calibrationFrequency, maintenanceFrequency, extraInfos, analogDigital, numero_patrimonio);
+      const response = await EditEquipment(id, name, description, manufacturerCompany, Number(category), calibrationFrequency, maintenanceFrequency, extraInfos, analogDigital, warningTimeForCalibration, numero_patrimonio);
       if (response.success) {
         setReload(true);
         setIsEdit(false);
@@ -179,7 +181,7 @@ export default function Equipments() {
       return response.success;
     }
     else {
-      const response = await CreateEquipment(name, description, manufacturerCompany, Number(category), calibrationFrequency, maintenanceFrequency, extraInfos, analogDigital);
+      const response = await CreateEquipment(name, description, manufacturerCompany, Number(category), calibrationFrequency, maintenanceFrequency, extraInfos, analogDigital, warningTimeForCalibration);
       if (response.success) {
         setReload(true);
         setIsEdit(false);
@@ -203,6 +205,7 @@ export default function Equipments() {
     setExtraInfos("");
     setCalibrationFrequency(0);
     setMaintenanceFrequency(0);
+    setWarningTimeForCalibration(0);
     setAnalogDigital("D");
     setNewlyOpened(true);
     setIsEdit(false);
@@ -308,17 +311,7 @@ export default function Equipments() {
                   required
                   disabled={!userIsAdmin}
                 />
-              </div>
-              <InputText
-                type='number'
-                placeholder='Frequência de Calibração (anos)'
-                required
-                value={calibrationFrequency}
-                className='equipment-data-input'
-                helperText='É obrigatório informar a frequência de calibração'
-                disabled={!userIsAdmin}
-                onChange={(event) => { setCalibrationFrequency(Number.parseInt(event.target.value)) }}
-              />
+              </div>              
               <InputText
                 type='number'
                 placeholder='Frequência de Manutenção (anos)'
@@ -329,6 +322,28 @@ export default function Equipments() {
                 disabled={!userIsAdmin}
                 onChange={(event) => { setMaintenanceFrequency(Number.parseInt(event.target.value)) }}
               />
+              <div className="row">
+                <InputText
+                  type='number'
+                  placeholder='Frequência de Calibração (anos)'
+                  required
+                  value={calibrationFrequency}
+                  className='equipment-data-input'
+                  helperText='É obrigatório informar a frequência de calibração'
+                  disabled={!userIsAdmin}
+                  onChange={(event) => { setCalibrationFrequency(Number.parseInt(event.target.value)) }}
+                />
+                <InputText
+                  type='number'
+                  placeholder='Aviso de Renovação da Calibração (dia)'
+                  required
+                  value={warningTimeForCalibration}
+                  className='equipment-data-input'
+                  helperText='É obrigatório informar a frequência de manutenção'
+                  disabled={!userIsAdmin}
+                  onChange={(event) => { setWarningTimeForCalibration(Number.parseInt(event.target.value)) }}
+                />
+              </div>
               <InputText
                 type='text'
                 placeholder='Critérios de Aceitação'

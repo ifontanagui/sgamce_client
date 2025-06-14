@@ -38,7 +38,7 @@
 .equipment-drawer {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
   height: 100%;
 
@@ -78,6 +78,13 @@
 
   .equipment-data-input {
     width: 100%;
+  }
+
+  .row {
+    width: 90%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
   }
 
   .save-button {
