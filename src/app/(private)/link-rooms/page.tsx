@@ -10,7 +10,7 @@ import InputText from "@/components/InputText";
 import Button from "@/components/Button";
 import Combo from "@/components/Combo";
 import Toast, { DispatchToast, DispatchToastProps } from "@/components/Toast";
-import { AddRoomMachine, AddRoomUser, FindRows, LinkAddressData, LinkUserData, ParseToBuildIRow, ParseToEquipmentIRow, ParseToRoomIRow, RoomData } from "@/services/links-service";
+import { AddRoomMachine, AddRoomUser, FindRows, LinkAddressData, ParseToBuildIRow, ParseToEquipmentIRow, ParseToRoomIRow, RoomData } from "@/services/links-service";
 import { FindUsersRows, UserData } from "@/services/users-service";
 import { EquipmentData, FindEquipmentsRows } from "@/services/equipments-service";
 import TabsSkeleton from "@/components/TabsSkeleton";
@@ -116,6 +116,7 @@ export default function Rooms() {
         setReload(false);
       })().catch(console.error);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reload]);
 
   React.useEffect(() => {
@@ -141,6 +142,7 @@ export default function Rooms() {
         }
       }
     })().catch(console.error);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [curTab]);
 
   React.useEffect(() => {
@@ -157,6 +159,7 @@ export default function Rooms() {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     })().catch(console.error);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openAddUser]);
     
   React.useEffect(() => {
@@ -193,6 +196,7 @@ export default function Rooms() {
   }
     
   const handleDeleteMachineClick = (row: IRow) => {
+    console.log('row: ', row);
     // if ((rows[curBuildRow]?.row)[curRoomRow]?.subList?.rows)
     //   rows[curBuildRow].row[curRoomRow].subList.rows = rows[curBuildRow].row[curRoomRow].subList.rows.filter(r => r[1] !== row.data[1])
 
@@ -226,6 +230,7 @@ export default function Rooms() {
   }
 
   const handleDeleteUserClick = (row: IRow) => {
+    console.log('row: ', row);
     // users = users.filter(x => x.data[1] !== row.data[1]);
     setReload(true);
   }

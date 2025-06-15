@@ -45,6 +45,7 @@ export async function FindEquipmentsRows():Promise<FindEquipmentsRowsReply> {
 }
 
 export async function FindEventsRows(equipmentId: number):Promise<FindEventsRowsReply> {
+  console.log('equipmentId: ', equipmentId);
   const data = [
     {
       evento: { id: 1, id_equipamento: 1, custo: 10.1, data_agendada: "01/01/2025", descricao: "Foi muito legal", tipo: 'Calibracao' },

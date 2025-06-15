@@ -8,11 +8,11 @@ import TabsSkeleton from "@/components/TabsSkeleton";
 import DefaultActions from "@/components/DefaultActions";
 import { Chip, Drawer, IconButton } from "@mui/material";
 import InputText from "@/components/InputText";
-import Toast, { DispatchToastProps } from "@/components/Toast";
+import Toast, { DispatchToast, DispatchToastProps } from "@/components/Toast";
 import Button from "@/components/Button";
 import Combo from "@/components/Combo";
 import InputDate from "@/components/InputDate";
-import { Description, WorkspacePremium, X } from "@mui/icons-material";
+import { WorkspacePremium } from "@mui/icons-material";
 import { EquipmentEventData, EventData, FindEquipmentsRows, FindEventsRows, ParseToEventIRow } from "@/services/event-certificate";
 
 function FilterDialog(props: {
@@ -68,6 +68,7 @@ export default function EventsCertificates() {
 
   const [equipmentData, setEquipmentData] = React.useState([] as EquipmentEventData[])
   const [equipmentRows, setEquipmentRows] = React.useState([] as IRow[]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [eventData, setEventData] = React.useState([] as EventData[])
   const [eventRows, setEventRows] = React.useState([] as IRow[]);
 
@@ -117,7 +118,12 @@ export default function EventsCertificates() {
           await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       })().catch(console.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [curTab]);
+    
+    React.useEffect(() => {
+      DispatchToast(toastMessage);
+    }, [toastMessage])
 
   return (
     <div className="events">

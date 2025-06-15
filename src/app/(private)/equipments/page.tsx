@@ -118,6 +118,7 @@ export default function Equipments() {
         setReload(false);
       })().catch(console.error);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openDrawer]);
   
   React.useEffect(() => {

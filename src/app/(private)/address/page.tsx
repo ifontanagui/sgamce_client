@@ -81,6 +81,7 @@ export default function Address() {
         setReload(false);
       })().catch(console.error);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reload]);
   
   React.useEffect(() => {
@@ -95,6 +96,7 @@ export default function Address() {
         setReload(false);
       })().catch(console.error);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openDrawer]);
   
   React.useEffect(() => {
