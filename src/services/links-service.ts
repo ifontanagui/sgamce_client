@@ -1,90 +1,194 @@
 import { IRow } from "@/components/Table"
-import { EquipmentData } from "./equipments-service"
+import { BaseGetRowsRequest, BasePostReply, BasePostRequest } from "./base-service"
+import { APIToView, ViewToAPI } from "@/utils/date-parse"
+import { UserData } from "./users-service"
 
-export interface BuildData {
+export interface LinkAddressData {
   id: number,
   nome: string,
+  rooms: RoomData[]
 }
-interface FindBuildsRowsReply {
-  success: boolean,
-  data: BuildData[]
+
+export interface RoomData {
+  id: number,
+  nome: string
+  sigla: string,
+  sala: string
+  users: LinkUserData[]
+  equipments: EquipmentData[]
 }
+
+export interface EquipmentData {
+  id: number
+  modelo: {
+    id: number,
+    equipamento: string
+  }
+  tag: number,
+  numero_patrimonio: number,
+  data_implantacao: string
+  ativo: number
+}
+
 export interface LinkUserData {
   id: number,
   nome: string,
   email: string,
-}
-export interface LinkEquipmentData {
-  equipamento: string,
-  numero_patrimonio: number,
-  identificacao: string,
-}
-export interface RoomData {
-  buildId: number,
-  id: number,
-  nome: string,
-  equipments: EquipmentData[],
-  users: LinkUserData[]
-}
-interface FindRoomsRowsReply {
-  success: boolean,
-  data: RoomData[]
+  admin: number
 }
 
-export async function FindBuildsRows(): Promise<FindBuildsRowsReply> {
-  const builds = [
-    { id: 1, nome: 'Prédio 01' },
-    { id: 2, nome: 'Prédio 02' },
-    { id: 3, nome: 'Prédio 03' },
-    { id: 4, nome: 'Prédio 04' },
-    { id: 5, nome: 'Prédio 05' },
-    { id: 6, nome: 'Prédio 06' },
-   ] as BuildData[]
+interface FindBuildsRowsReply {
+  success: boolean,
+  data: LinkAddressData[]
+}
+
+export async function FindRows(): Promise<FindBuildsRowsReply> {
+  const [replyRooms, replyEquipments, replyUsers] = await Promise.all([
+      BaseGetRowsRequest('/laboratorios'),
+      BaseGetRowsRequest('/equipamentos'),
+      BaseGetRowsRequest('/usuarios'),
+    ])
+
+  if (!replyRooms.success || !replyEquipments.success || !replyUsers.success ) {
+    return {
+      success: false,
+      data: []
+    }
+  }
+  
+  let data = [] as LinkAddressData[]  
+
+  replyRooms.data.forEach(x => {
+    const build = data.find(b => b.id === x.id_bloco.id)
+    if (build) {
+      build.rooms.push({
+        id: x.id,
+        nome: x.nome,
+        sala: x.sala,
+        sigla: x.sigla,
+        equipments: [],
+        users: []
+      })
+
+      data = [
+        ...data.filter(b => b.id !== build.id),
+        build
+      ]
+    }
+    else {
+      data.push({
+        id: x.id_bloco.id,
+        nome: x.id_bloco.nome,
+        rooms: [{
+          id: x.id,
+          nome: x.nome,
+          sala: x.sala,
+          sigla: x.sigla,
+          equipments: [],
+          users: []
+        }]
+      })
+    }
+  });
+
+  replyUsers.data.forEach(u => {
+    let build = null as LinkAddressData | null;
+    let room = null as RoomData | null;
+
+    for(const x of data) {
+      if (room) continue;
+      
+      const r = x.rooms.find(y => u.id_laboratorio && y.id === u.id_laboratorio.id) || null
+      if (r) {
+        build = x;        
+        room = r;
+      }
+    }
+
+    if (room && build?.rooms && room?.users) {
+
+      room.users.push({
+        id: u.id,
+        email: u.email,
+        nome: u.nome,
+        admin: u.admin
+      })
+
+      build.rooms = [
+        ...build?.rooms.filter(x => x.id !== room?.id),
+        room
+      ]
+      
+      data = [
+        ...data.filter(x => x.id !== build?.id),
+        build
+      ]
+    }
+  })
+  
+  replyEquipments.data.forEach(e => {
+    let build = null as LinkAddressData | null;
+    let room = null as RoomData | null;
+    
+    for(const x of data) {
+      if (room) continue;
+      
+      const r = x.rooms.find(y => e.id_laboratorio && y.id === e.id_laboratorio.id) || null
+      if (r) {
+        build = x;
+        room = r;
+      }
+    }
+
+    if (room && build?.rooms && room?.equipments) {
+      room.equipments.push({
+        id: e.id,
+        tag: e.tag,
+        numero_patrimonio: e.numero_patrimonio,
+        data_implantacao: APIToView(e.data_implantacao),
+        ativo: e.ativo,
+        modelo: {
+          id: e.id_modelo.id,
+          equipamento: e.id_modelo.equipamento,
+        }
+      })
+
+      build.rooms = [
+        ...build?.rooms.filter(x => x.id !== room?.id),
+        room
+      ]
+
+      data = [
+        ...data.filter(x => x.id !== build?.id),
+        build
+      ]
+    }
+  })
 
   return {
     success: true,
-    data: builds
+    data
   }
 } 
 
-export async function FindRoomsRows(buildId: number):Promise<FindRoomsRowsReply> {
-  const rooms = [
-    { 
-      buildId: 1, 
-      id: 1, 
-      nome: 'Sala 01', 
-      equipments: [
-        { equipamento: 'Computador 01', identificacao: '1', numero_patrimonio: 1 },
-        { equipamento: 'Computador 02', identificacao: '2', numero_patrimonio: 2 },
-      ],
-      users: [
-        { id: 1, nome: 'Usuário 01', email: 'usuqrio01@email.com'},
-        { id: 2, nome: 'Usuário 02', email: 'usuqrio02@email.com'},
-        { id: 3, nome: 'Usuário 03', email: 'usuqrio03@email.com'},
-        { id: 4, nome: 'Usuário 04', email: 'usuqrio04@email.com'},
-        { id: 5, nome: 'Usuário 05', email: 'usuqrio05@email.com'}
-      ]
-    }, 
-    { buildId: 1, id: 2, nome: 'Laboratório 01', equipments: [], users: [] },
-    { buildId: 1, id: 3, nome: 'Sala 02' , equipments: [], users: []}, 
-    { buildId: 1, id: 4, nome: 'Laboratório 03', equipments: [], users: [] },
-    { buildId: 2, id: 1, nome: 'Sala 01' , equipments: [], users: []}, 
-    { buildId: 2, id: 2, nome: 'Laboratório 01', equipments: [], users: [] },
-    { buildId: 3, id: 1, nome: 'Sala 01' , equipments: [], users: []}, 
-    { buildId: 3, id: 2, nome: 'Laboratório 01', equipments: [], users: [] },
-    { buildId: 4, id: 1, nome: 'Sala 01' , equipments: [], users: []}, 
-    { buildId: 4, id: 2, nome: 'Laboratório 01', equipments: [], users: [] },
-    { buildId: 6, id: 1, nome: 'Sala 01' , equipments: [], users: []}, 
-    { buildId: 6, id: 2, nome: 'Laboratório 01', equipments: [], users: [] },
-  ] as RoomData[]
-
-  return {
-    success: true,
-    data: rooms.filter(x => x.buildId === buildId)
-  }
+export async function AddRoomMachine(tag: string, numero_patrimonio: string, id_modelo: number, data_implantacao: string, id_laboratorio: number): Promise<BasePostReply> {
+  return BasePostRequest('/equipamento', { 
+    tag, 
+    numero_patrimonio, 
+    id_modelo, 
+    data_implantacao: ViewToAPI(data_implantacao), 
+    id_laboratorio 
+  })
 }
 
-export function ParseToBuildIRow(data: BuildData[]): IRow[] {
+export async function AddRoomUser(user: UserData, id_laboratorio: number) {
+  return BasePostRequest('/usuario/atualizar', { 
+    ...user,
+    id_laboratorio
+  });
+}
+
+export function ParseToBuildIRow(data: LinkAddressData[]): IRow[] {
   return data.map(x => { 
     return { 
       data: [x.id, x.nome], 
@@ -103,10 +207,10 @@ export function ParseToRoomIRow(data: RoomData[]): IRow[] {
     } as IRow});
 }
 
-export function ParseToUserIRow(data: LinkUserData[]): IRow[] {
+export function ParseToEquipmentIRow(data: EquipmentData[]): IRow[] {
   return data.map(x => {
     return {
-      data: [ x.id, x.nome ]
+      data: [ x.id, x.modelo.equipamento, x.numero_patrimonio, x.tag, x.data_implantacao ]
     } as IRow
   })
 }

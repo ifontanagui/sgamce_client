@@ -9,11 +9,12 @@ import { AddCircleOutline, GroupAdd, AddToQueue } from "@mui/icons-material";
 import InputText from "@/components/InputText";
 import Button from "@/components/Button";
 import Combo from "@/components/Combo";
-import { DispatchToast, DispatchToastProps } from "@/components/Toast";
-import { FindBuildsRows, FindRoomsRows, LinkUserData, ParseToBuildIRow, ParseToRoomIRow, ParseToUserIRow, RoomData } from "@/services/links-service";
-import { FindUsersRows } from "@/services/users-service";
+import Toast, { DispatchToast, DispatchToastProps } from "@/components/Toast";
+import { AddRoomMachine, AddRoomUser, FindRows, LinkAddressData, LinkUserData, ParseToBuildIRow, ParseToEquipmentIRow, ParseToRoomIRow, RoomData } from "@/services/links-service";
+import { FindUsersRows, UserData } from "@/services/users-service";
 import { EquipmentData, FindEquipmentsRows } from "@/services/equipments-service";
 import TabsSkeleton from "@/components/TabsSkeleton";
+import InputDate from "@/components/InputDate";
 
 function roomRowActions(
   onClickActionUser:  () => void
@@ -40,9 +41,9 @@ function equipmentRowActions(
 }
 
 export default function Rooms() {
-  // const [buildsData, setBuildsData] = React.useState([] as BuildData[]);
+  const [data, setData] = React.useState([] as LinkAddressData[]);
   const [roomsData, setRoomsData] = React.useState([] as RoomData[]);
-  const [usersData, setUsersData] = React.useState([] as LinkUserData[])
+  const [usersData, setUsersData] = React.useState([] as UserData[])
   const [equipmentsData, setEquipmentsData] = React.useState([] as EquipmentData[])
   const [buildRows, setBuildRows] = React.useState([] as IRow[]);
   const [roomRows, setRoomRows] = React.useState([] as IRow[]);
@@ -53,11 +54,11 @@ export default function Rooms() {
   const [buildId, setBuildId ] = React.useState(0);
   const [roomId, setRoomId ] = React.useState(0);
   const [curTab, setCurTab ] = React.useState(0);
-  const [curRoomRow, setCurRoomRow ] = React.useState(-1);
   const [openAddMachineForm, setOpenAddMachineForm] = React.useState(false);
   const [newlyOpened, setNewlyOpened] = React.useState(true);
   const [assetNumber, setAssetNumber] = React.useState(0);
   const [identifierNumber, setIdentifierNumber] = React.useState(0);
+  const [equipmentAmendmentDate, setEquipmentAmendmentDate ] = React.useState("");
   const [equipment, setEquipment] = React.useState("")
   const [openAddUser, setOpenAddUser] = React.useState(false);
   const [openAddUserForm, setOpenAddUserForm] = React.useState(false);
@@ -67,14 +68,45 @@ export default function Rooms() {
     if (reload) {
       (async () => {
         Promise.all([
-          FindBuildsRows(),
+          FindRows(),
           FindUsersRows(),
           FindEquipmentsRows()
         ])
           .then(([addressRowsReply, users, equipments]) => {
+            
+            setData(addressRowsReply.data)
             setBuildRows(ParseToBuildIRow(addressRowsReply.data));
             setUsersData(users.data);
             setEquipmentsData(equipments.data);
+
+            if (curTab === 1) {
+              const build = addressRowsReply.data.find(x => x.id === buildId);
+              if (build){
+                setRoomsData(build.rooms)
+                setRoomRows(ParseToRoomIRow(build.rooms))
+                
+                const room = build.rooms.find(x => x.id === roomId)
+                if (room) {
+                  setUsersRows(room.users.map(x => { return { data: [x.id, x.nome]}}));
+                }
+              }
+            }
+            else if (curTab === 2) {
+              const build = addressRowsReply.data.find(x => x.id === buildId);
+              if (build){
+                setRoomsData(build.rooms)
+                setRoomRows(ParseToRoomIRow(build.rooms))
+                
+                const room = build.rooms.find(x => x.id === roomId);        
+                
+                if (room) {
+                  setEquipmentRows(ParseToEquipmentIRow(room.equipments));
+                }
+                else {
+                  setEquipmentRows([])
+                }
+              }
+            }
           })
           .catch(() => {
             setToastMessage({ type: "error", message: "Ocorreu um erro ao buscar os dados, tente novamente" })
@@ -89,15 +121,24 @@ export default function Rooms() {
   React.useEffect(() => {
     (async () => {
       if (curTab === 0) {
-        setRoomsData([])
         setRoomRows([])
+        setRoomsData([])
       }
-      if (curTab === 1) {
-        const rooms = await FindRoomsRows(buildId);
-        setRoomsData(rooms.data)
-        setRoomRows(ParseToRoomIRow(rooms.data))
-          
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      else if (curTab === 1) {
+        const build = data.find(x => x.id === buildId);
+        if (build){
+          setRoomsData(build.rooms)
+          setRoomRows(ParseToRoomIRow(build.rooms))
+        }
+      }
+      else if (curTab === 2) {
+        const room = roomsData.find(x => x.id === roomId);        
+        if (room) {
+          setEquipmentRows(ParseToEquipmentIRow(room.equipments));
+        }
+        else {
+          setEquipmentRows([])
+        }
       }
     })().catch(console.error);
   }, [curTab]);
@@ -105,9 +146,9 @@ export default function Rooms() {
   React.useEffect(() => {
     (async () => {
       if (openAddUser) {
-        const room = roomsData.find(x => x.buildId === buildId && x.id === roomId)
+        const room = roomsData.find(x => x.id === roomId)
         if (room?.users.length) {
-          setUsersRows(ParseToUserIRow(room.users));
+          setUsersRows(room.users.map(x => { return { data: [x.id, x.nome]}}));
         }
         else {
           setUsersRows([])
@@ -126,20 +167,29 @@ export default function Rooms() {
     setNewlyOpened(false);
     
     if (!assetNumber || !identifierNumber || !equipment) return false;
-
-    // if ((rows[curBuildRow]?.row)[curRoomRow]?.subList?.rows)
-    //   rows[curBuildRow].row[curRoomRow].subList.rows.push([equipment, assetNumber, identifierNumber])
     
-    handleCloseAddEquipment();
+    const response = await AddRoomMachine(assetNumber.toString(), identifierNumber.toString(), Number.parseInt(equipment), equipmentAmendmentDate, roomId);
+    if (response.success) {
+      handleCloseAddEquipment()
+      setReload(true);
 
-    return true;
+      setToastMessage({type: "success", message:  "Equipamento vinculado com sucesso"});
+    }
+    else {
+      setToastMessage({type: "error", message:  response.message || "Erro ao vincular o equipamento, tente novamente"});
+    }
+
+    return response.success;
+
   }
 
   const handleCloseAddEquipment = () => {   
     setAssetNumber(0);
     setIdentifierNumber(0);
     setEquipment("");
+    setEquipmentAmendmentDate("");
     setNewlyOpened(true);
+    setOpenAddMachineForm(false)
   }
     
   const handleDeleteMachineClick = (row: IRow) => {
@@ -154,11 +204,25 @@ export default function Rooms() {
     
     if (!equipment) return false;
 
-    // users.push({data: [equipment]})
-    
-    handleCloseAddEquipment();
+    const user = usersData.find(x => x.id === Number.parseInt(equipment))
 
-    return true;
+    if (user) {
+      const response = await AddRoomUser(user, roomId);
+      if (response.success) {
+        handleCloseAddEquipment();
+        setReload(true);
+        
+        setToastMessage({type: "success", message:  "Usuário vinculado com sucesso"});
+      }
+      else {
+        setToastMessage({type: "error", message:  response.message || "Erro ao vincular o usuário, tente novamente"});
+      }
+      
+      return response.success;
+    }
+
+    setToastMessage({type: "error", message:  "Erro ao vincular o usuário, tente novamente"});
+    return false;
   }
 
   const handleDeleteUserClick = (row: IRow) => {
@@ -178,14 +242,17 @@ export default function Rooms() {
             {
               header: 'Blocos', content: 
               <div className="room-tab">
-                {!!buildId && <Chip className="room-chip" label={buildRows.find(x => x.data[0] === buildId)?.data[1]} variant="outlined" />}
+                <div className="room-tab-table-header" >
+                  {!!buildId && <Chip className="room-chip" label={buildRows.find(x => x.data[0] === buildId)?.data[1]} variant="outlined" />}
+                </div>
                 <div className="room-tab-table">
                   <Table
                     headers={['ID', 'Prédio']}
-                    rows={buildRows}
+                    rows={[...buildRows, ...buildRows]}
                     className="rooms-table"
                     rowClick={(row: IRow) => {
-                      setBuildId(Number.parseInt(row.data[0].toString()));setRoomId(0);
+                      setBuildId(Number.parseInt(row.data[0].toString()));
+                      setRoomId(0);
                     }}
                   />
                 </div>
@@ -193,25 +260,16 @@ export default function Rooms() {
             },
             { header: 'Salas', content:
               <div className="room-tab">
-                {!!buildId && <Chip className="room-chip" label={buildRows.find(x => x.data[0] === buildId)?.data[1]} variant="outlined" />}
-                {!!roomId && <Chip className="room-chip" label={roomRows.find(x => x.data[0] === roomId)?.data[1]} variant="outlined" />}
+                <div className="room-tab-table-header" >
+                  {!!buildId && <Chip className="room-chip" label={buildRows.find(x => x.data[0] === buildId)?.data[1]} variant="outlined" />}
+                  {!!roomId && <Chip className="room-chip" label={roomRows.find(x => x.data[0] === roomId)?.data[1]} variant="outlined" />}
+                </div>
                 <div className="room-tab-table">
                   <Table
                     headers={['ID', 'Sala/Laboratório']}
                     rows={roomRows}
                     className="rooms-table"
-                    rowClick={(row: IRow) => {
-                      const id = Number.parseInt(row.data[0].toString());
-                      setRoomId(id);
-
-                      const room = roomsData.find(x => x.buildId === buildId && x.id === id);
-                      if (room?.equipments.length) {
-                        setEquipmentRows( room.equipments.map(x => { return { data: [ x.equipamento, x.identificacao, x.numero_patrimonio ] } as IRow}))
-                      }
-                      else {
-                        setEquipmentRows([]);
-                      }
-                    }}
+                    rowClick={(row: IRow) => {setRoomId(Number.parseInt(row.data[0].toString()));}}
                     rowActions={roomRowActions(() => {
                       setOpenAddUser(true);
                       setOpenAddUserForm(false);
@@ -222,17 +280,18 @@ export default function Rooms() {
             },
             { header: 'Equipamentos', content:
               <div className="room-tab">
-                {!!buildId && <Chip className="room-chip" label={buildRows.find(x => x.data[0] === buildId)?.data[1]} variant="outlined" />}
-                {!!roomId && <Chip className="room-chip" label={roomRows.find(x => x.data[0] === roomId)?.data[1]} variant="outlined" />}
+                <div className="equipments-tab-header">
+                  <div className="room-tab-table-header" >
+                    {!!buildId && <Chip className="room-chip" label={buildRows.find(x => x.data[0] === buildId)?.data[1]} variant="outlined" />}
+                    {!!roomId && <Chip className="room-chip" label={roomRows.find(x => x.data[0] === roomId)?.data[1]} variant="outlined" />}
+                  </div>
+                  {equipmentRowActions(() => {setOpenAddMachineForm(true);})}
+                </div>
                 <div className="room-tab-table">
                   <Table
-                    headers={['Equipamento', 'Nro. Identificação', 'Nro. Patrimonio']}
+                    headers={['ID', 'Equipamento', 'Nro. Identificação', 'Nro. Patrimonio', 'Dt. Implantação']}
                     rows={equipmentRows}
                     className="rooms-table"
-                    rowClick={(row: IRow, index: number) => {setCurRoomRow(index)}}
-                    rowActions={equipmentRowActions(() => {
-                      setOpenAddMachineForm(true);
-                    })}
                     deleteAction={handleDeleteMachineClick}
                   />
                 </div>
@@ -311,6 +370,13 @@ export default function Rooms() {
                 onChange={(event) => { setIdentifierNumber(Number.parseInt(event.target.value)) }}
                 className="input-equipment-input"
               />   
+              <InputDate 
+                label="Dt. Implantação"
+                onChange={(value: string) => setEquipmentAmendmentDate(value)}
+                className='equipment-date-input'
+                value={equipmentAmendmentDate}
+                helperText="É obrigatório informar a data do agendamento"
+              />
               <div className='equipments-combo'>
                 <Combo 
                   title="Equipamentos" 
@@ -330,6 +396,7 @@ export default function Rooms() {
               />
             </div>
           </Drawer>
+          <Toast />
         </>
       }
     </div>

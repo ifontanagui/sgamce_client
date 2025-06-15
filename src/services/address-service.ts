@@ -25,7 +25,12 @@ export async function FindBuildAddressRows(): Promise<FindAddressRowsReply> {
     BaseGetRowsRequest('/laboratorios'),
   ])
   
-  if (!replyBuilds.success || !replyRooms.success ) return replyRooms;
+  if (!replyBuilds.success || !replyRooms.success ) {
+    return {
+      success: false,
+      data: []
+    }
+  };
 
   let data = replyBuilds.data.map(x => { return { ...x, rooms: [] } })
 

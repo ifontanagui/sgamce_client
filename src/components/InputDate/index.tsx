@@ -35,14 +35,14 @@ export default function InputDate(props: InputDateProps) {
               className="input-date-input"
               label={props.label}
               format='DD/MM/YYYY'
-              value={dayjs(props.value, "DD/MM/YYYY")}
+              value={props.value ? dayjs(props.value, "DD/MM/YYYY") : dayjs("DD/MM/YYYY")}
               onChange={(event) => {
                 if (!event) 
                   props.onChange('');
                 else
                   props.onChange(event.format("DD/MM/YYYY"));
               }}
-              defaultValue={props.defaultValue}
+              defaultValue={props.defaultValue || dayjs("DD/MM/YYYY")}
               disabled={props.disabled}
             />
           </div>

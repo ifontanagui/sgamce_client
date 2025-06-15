@@ -16,19 +16,31 @@
     height: 100%;
     overflow-x: auto;
 
-    .room-chip {
-      border: 2px solid var(--default-blue-color);
-      margin: 5px;
+    .room-tab-table-header {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      height: 40px;
 
-      .MuiChip-label {
-        color: var(--default-blue-color);
-        font-weight: 700;
-        font-size: 14;
+      .room-chip {
+        border: 2px solid var(--default-blue-color);
+        margin: 5px;
+
+        .MuiChip-label {
+          color: var(--default-blue-color);
+          font-weight: 700;
+          font-size: 14;
+        }
       }
     }
 
+    .equipments-tab-header {
+      display: flex;
+      justify-content: space-between;
+    }
+
     .room-tab-table {
-      height: 100%;
+      height: calc(100% - 40px);
       width: 100%;
       display: flex;
       flex-direction: column;
@@ -75,6 +87,10 @@
     margin-top: 20px;
     padding: 0 5px;
     margin-left: 2.5%;
+  }
+
+  .equipment-date-input {
+    width: 100%;
   }
 
   .save-button {
