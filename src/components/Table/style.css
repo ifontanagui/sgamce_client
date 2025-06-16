@@ -26,11 +26,11 @@
     }
 
     .inactive {
-      color: var(--default-red-color);
+      color: var(--soft-black-color);
     }
 
     .active {
-      color: var(--default-green-color);
+      color: var(--default-blue-color);
     }
 
     .close {
