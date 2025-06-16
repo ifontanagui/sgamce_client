@@ -13,7 +13,7 @@ import Button from "@/components/Button";
 import Combo from "@/components/Combo";
 import InputDate from "@/components/InputDate";
 import { WorkspacePremium } from "@mui/icons-material";
-import { EquipmentEventData, EventData, FindEquipmentsRows, FindEventsRows, ParseToEventIRow } from "@/services/event-certificate";
+import { CreateCertificate, CreateEvent, EquipmentEventData, EventData, FindEquipmentsRows, ParseToEquipmentIRow, ParseToEventIRow } from "@/services/event-certificate-service";
 
 function FilterDialog(props: {
   equipmentFilter: string, 
@@ -79,8 +79,10 @@ export default function EventsCertificates() {
   const [certificateNumber, setCertificateNumber ] = React.useState("");
   const [certificateIssuingAuthority, setCertificateIssuingAuthority ] = React.useState("");
   const [certificateDate, setCertificateDate ] = React.useState("");
+  const [newlyOpened, setNewlyOpened] = React.useState(true);
 
-  const [equipmentId, setEquipmentId] = React.useState(0);
+  const [equipmentId, setEquipmentId] = React.useState(null as EquipmentEventData | null);
+  const [eventId, setEventId] = React.useState(0);
   const [equipmentFilter, setEquipmentFilter ] = React.useState("");
   const [assetNumberFilter, setAssetNumberFilter ] = React.useState(null as number | null);
   const [identifierNumberFilter, setIdentifierNumberFilter ] = React.useState(null as number | null);
@@ -93,10 +95,18 @@ export default function EventsCertificates() {
         (async () => {
           const equipmentsRowsReply = await FindEquipmentsRows();
           setEquipmentData(equipmentsRowsReply.data);
-          setEquipmentRows(equipmentsRowsReply.data.map(x =>{ return {data: [x.id, x.equipamento, x.identificacao, x.numero_patrimonio]} as IRow}));
+          setEquipmentRows(ParseToEquipmentIRow(equipmentsRowsReply.data));
   
           if (!equipmentsRowsReply.success) {
             setToastMessage({ type: "error", message: "Ocorreu um erro ao buscar as categorias, tente novamente" })
+          }
+
+          if (curTab == 1) {
+            const equipment = equipmentsRowsReply.data.find(x => x.id === equipmentId?.id)
+            if (equipment) {
+              setEventData(equipment.events)
+              setEventRows(ParseToEventIRow(equipment.events))
+            }       
           }
   
           setReload(false);
@@ -104,26 +114,80 @@ export default function EventsCertificates() {
       }
     }, [reload]);
     
-    React.useEffect(() => {
-      (async () => {
-        if (curTab === 0) {
-          setEventData([])
-          setEventRows([])
-        }
-        if (curTab === 1) {
-          const events = await FindEventsRows(equipmentId);
-          setEventData(events.data)
-          setEventRows(ParseToEventIRow(events.data))
-            
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-      })().catch(console.error);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [curTab]);
-    
-    React.useEffect(() => {
-      DispatchToast(toastMessage);
-    }, [toastMessage])
+  React.useEffect(() => {
+    (async () => {
+      if (curTab === 0) {
+        setEventData([])
+        setEventRows([])
+      }
+      if (curTab === 1) {
+        const equipment = equipmentData.find(x => x.id === equipmentId?.id)
+        if (equipment) {
+          setEventData(equipment.events)
+          setEventRows(ParseToEventIRow(equipment.events))
+        }            
+      }
+    })().catch(console.error);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [curTab]);
+  
+  React.useEffect(() => {
+    DispatchToast(toastMessage);
+  }, [toastMessage])
+
+  const handleAddEventClick = async () => {    
+    setNewlyOpened(false);
+
+    if (!eventType || !eventDescription || !eventAmount || !eventAmendmentDate || !equipmentId) return false;
+
+    const response = await CreateEvent(eventType, eventAmendmentDate, eventDescription, eventAmount, equipmentId.id);
+    if (response.success) {
+      setReload(true);
+      handleCloseAddEvent();
+
+      setToastMessage({type: "success", message:  "Evento criado com sucesso!"})
+    }
+    else {
+      setToastMessage({type: "error", message:  response.message || "Erro ao cadastrar o evento, tente novamente"});
+    }
+
+    return response.success;
+  }
+
+  const handleCloseAddEvent = () => {
+    setEventType("");
+    setEventDescription("");
+    setEventAmount(0);
+    setEventAmendmentDate("");
+    setOpenDrawerEvent(false);
+    setNewlyOpened(true);
+  }
+
+  const handleAddCertificateClick = async () => {    
+    setNewlyOpened(false);
+
+    if (!certificateNumber || !certificateDate || !certificateIssuingAuthority) return false;
+
+    const response = await CreateCertificate(Number.parseInt(certificateNumber), certificateDate, certificateIssuingAuthority, eventId);
+    if (response.success) {
+      setReload(true);
+      handleCloseAddCertificate();
+
+      setToastMessage({type: "success", message:  "Evento criado com sucesso!"})
+    }
+    else {
+      setToastMessage({type: "error", message:  response.message || "Erro ao cadastrar o evento, tente novamente"});
+    }
+
+    return response.success;
+  }
+
+  const handleCloseAddCertificate = () => {
+    setNewlyOpened(true);
+    setCertificateDate("")
+    setCertificateIssuingAuthority("");
+    setCertificateNumber("")
+  }
 
   return (
     <div className="events">
@@ -139,7 +203,7 @@ export default function EventsCertificates() {
               <div className="event-tab">
                 <div className="event-tab-header">  
                   <div className="event-tab-header-chip-container">  
-                    {!!equipmentId && <Chip className="event-tab-header-chip" label={equipmentData.find(x => x.id === equipmentId)?.equipamento} variant="outlined" />}
+                    {!!equipmentId && <Chip className="event-tab-header-chip" label={`${equipmentId.equipamento} - ${equipmentId.tag}`} variant="outlined" />}
                   </div>
                   <DefaultActions 
                     refreshAction={() => {}}
@@ -158,11 +222,13 @@ export default function EventsCertificates() {
                 </div>
                 <div className="event-tab-table">
                   <Table
-                    headers={['ID', 'Equipamento', 'Nro. Identificação', 'Nro. Patrimonio']}
+                    headers={['ID', 'Equipamento', 'Nro. Identificação', 'Nro. Patrimonio', 'Eventos Totais']}
                     rows={equipmentRows}
                     className="event-table"
                     rowClick={(row: IRow) => {
-                      setEquipmentId(Number.parseInt(row.data[0].toString()));
+                      const equipment = equipmentData.find(x => x.id === Number.parseInt(row.data[0].toString()))
+
+                      setEquipmentId(equipment || null);
                     }}
                   />
                 </div>
@@ -172,7 +238,7 @@ export default function EventsCertificates() {
               <div className="event-tab">
                 <div className="event-tab-header">
                   <div className="event-tab-header-chip-container" >
-                    {!!equipmentId && <Chip className="event-tab-header-chip" label={equipmentData.find(x => x.id === equipmentId)?.equipamento} variant="outlined" />}
+                    {!!equipmentId && <Chip className="event-tab-header-chip" label={`${equipmentId.equipamento} - ${equipmentId.tag}`} variant="outlined" />}
                   </div>
                     <DefaultActions 
                       addAction={() => { setOpenDrawerEvent(true); }}
@@ -180,22 +246,13 @@ export default function EventsCertificates() {
                 </div>
                 <div className="event-tab-table">
                   <Table
-                    headers={['ID', 'Descrição', 'Tipo', 'Dt. Agendamento', 'Custo']}
+                    headers={['ID', 'Tipo', 'Dt. Agendamento', 'Descrição', 'Custo']}
                     rows={eventRows}
                     className="event-table"
-                    // rowClick={(row: IRow) => {
-                    //   const id = Number.parseInt(row.data[0].toString());
-                    //   setRoomId(id);
-
-                    //   const room = roomsData.find(x => x.buildId === buildId && x.id === id);
-                    //   if (room?.equipments.length) {
-                    //     setEquipmentRows( room.equipments.map(x => { return { data: [ x.equipamento, x.identificacao, x.numero_patrimonio ] } as IRow}))
-                    //   }
-                    //   else {
-                    //     setEquipmentRows([]);
-                    //   }
-                    // }}
                     rowActions={eventRowActions(() => {setOpenDrawerCertificate(true)})}
+                    rowClick={(row: IRow) => {
+                      setEventId(Number.parseInt(row.data[0].toString()));
+                    }}
                   />
                 </div>
               </div>
@@ -206,7 +263,7 @@ export default function EventsCertificates() {
           anchor='right'
           open={openDrawerEvent}
           onClose={() => {
-          // handleCloseAddCategory();
+            handleCloseAddEvent();
             setOpenDrawerEvent(false);
           }}
         >
@@ -218,8 +275,10 @@ export default function EventsCertificates() {
                 title="Tipo"
                 value={eventType}
                 onChange={(value: string | number) => setEventType(value.toString())}
-                valuesList={[{value: 'Calibracao', description: 'Calibração'},{value: 'Manutencao', description: 'Manutenção'},{value: 'Qualificao', description: 'Qualificação'},{value: 'Checagem', description: 'Checagem'}]}
+                valuesList={[{value: 'Calibracao', description: 'Calibração'},{value: 'Manutencao', description: 'Manutenção'},{value: 'Qualificao', description: 'Qualificação'},{value: 'Verificacao', description: 'Verificação'}]}
                 required
+                error={!newlyOpened && !eventType}
+                helperText="É obrigatório informar o tipo do evento"
                 emptyValue
               />
             </div>
@@ -227,9 +286,9 @@ export default function EventsCertificates() {
               type='text'
               placeholder='Descrição'
               value={eventDescription}
-              helperText="teste"
+              helperText="É obrigatório informar a descrição do evento"
               className='event-input'
-              // error={!newlyOpened && !name}
+              error={!newlyOpened && !eventDescription}
               onChange={(event) => { setEventDescription(event.target.value) }}
             />
             <InputText
@@ -237,7 +296,8 @@ export default function EventsCertificates() {
               placeholder='Custo'
               value={eventAmount}
               className='event-input'
-              // error={!newlyOpened && !name}
+              error={!newlyOpened && !eventAmount}
+              helperText="É obrigatório informar o custo do evento"
               onChange={(event) => { setEventAmount(Number.parseInt(event.target.value)) }}
             />
             <InputDate 
@@ -245,19 +305,14 @@ export default function EventsCertificates() {
               onChange={(value: string) => setEventAmendmentDate(value)}
               className='event-date-input'
               value={eventAmendmentDate}
+              error={!newlyOpened && !eventAmendmentDate}
               helperText="É obrigatório informar a data do agendamento"
             />
             <Button 
               className="save-button"
               onClick={async () => {
-                // const result = await handleAddUCategoryClick();
-                // if (result)
-
-                  console.log(eventType);
-                  console.log(eventDescription);
-                  console.log(eventAmount);
-                  console.log(eventAmendmentDate);
-
+                const result = await handleAddEventClick();
+                if (result)
                   setOpenDrawerEvent(false);
               }} 
               textContent='Salvar'
@@ -281,7 +336,7 @@ export default function EventsCertificates() {
               value={certificateNumber}
               helperText="teste"
               className='event-input'
-              // error={!newlyOpened && !name}
+              error={!newlyOpened && !certificateNumber}
               onChange={(event) => { setCertificateNumber(event.target.value) }}
             />
             <InputText
@@ -290,21 +345,22 @@ export default function EventsCertificates() {
               value={certificateIssuingAuthority}
               helperText="teste"
               className='event-input'
-              // error={!newlyOpened && !name}
+              error={!newlyOpened && !certificateIssuingAuthority}
               onChange={(event) => { setCertificateIssuingAuthority(event.target.value) }}
             />
             <InputDate 
-              label="Dt. Agendamento"
+              label="Data"
               onChange={(value: string) => setCertificateDate(value)}
               className='event-date-input'
               value={certificateDate}
+              error={!newlyOpened && !certificateDate}
               helperText="É obrigatório informar a data do agendamento"
             />
             <Button 
               className="save-button"
               onClick={async () => {
-                // const result = await handleAddUCategoryClick();
-                // if (result)
+                const result = await handleAddCertificateClick();
+                if (result)
                   setOpenDrawerEvent(false);
               }} 
               textContent='Salvar'
