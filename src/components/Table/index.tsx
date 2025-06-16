@@ -2,11 +2,12 @@
 
 import './style.css'
 import React from 'react';
-import { KeyboardArrowUp, Check, Clear, Delete, Edit }  from '@mui/icons-material';
+import { KeyboardArrowUp, Check, Clear, Circle, Edit }  from '@mui/icons-material';
 import { Collapse, IconButton, Table as MUITable, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from '@mui/material';
 
 export interface IRow {
   data: (string | number | boolean)[],
+  active?: boolean
   subList?: {
     title: string,
     headers: string[],
@@ -60,9 +61,9 @@ function Row({ row, withSubList, editAction, deleteAction, emptyTable, rowAction
         }
         {!emptyTable && 
         <>
-          {deleteAction &&
+          {deleteAction && row.active !== undefined &&
           <TableCell className='table-row-sublist-list-header-cell-icon' >
-            <IconButton onClick={() => deleteAction(row)}><Delete className='delete' /></IconButton>
+            <IconButton onClick={() => deleteAction(row)}><Circle className={!!row.active ? 'active' : 'inactive'} /></IconButton>
           </TableCell>}
           {editAction &&
           <TableCell className='table-row-sublist-list-header-cell-icon' >

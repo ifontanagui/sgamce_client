@@ -8,7 +8,7 @@ import DefaultActions from "@/components/DefaultActions";
 import InputText from "@/components/InputText";
 import Button from "@/components/Button";
 import { Drawer } from "@mui/material";
-import { CategoryData, CreateCategory, EditCategory, FindCategoriesRows } from "@/services/categories-service";
+import { ActivateDeactivateCategory, CategoryData, CreateCategory, EditCategory, FindCategoriesRows, ParseToIRow } from "@/services/categories-service";
 import Toast, { DispatchToast, DispatchToastProps } from "@/components/Toast";
 import { getCookie } from "cookies-next";
 
@@ -49,7 +49,7 @@ export default function Categories() {
       (async () => {
         const categoriesRowsReply = await FindCategoriesRows();
         setData(categoriesRowsReply.data);
-        setRows(categoriesRowsReply.data.map(x =>{ return {data: [x.id, x.nome]} as IRow}));
+        setRows(ParseToIRow(categoriesRowsReply.data));
 
         if (!categoriesRowsReply.success) {
           setToastMessage({ type: "error", message: "Ocorreu um erro ao buscar as categorias, tente novamente" })
@@ -66,8 +66,8 @@ export default function Categories() {
 
   const handleFilterClick = async () => {
     const categoriesRows = !nameFilter
-      ? data.map(x =>{ return {data: [x.id, x.nome]} as IRow})
-      : data.filter(x => x.nome.toString().toLowerCase().includes(nameFilter.toLowerCase())).map(x =>{ return {data: [x.id, x.nome]} as IRow});
+      ? ParseToIRow(data)
+      : ParseToIRow(data.filter(x => x.nome.toString().toLowerCase().includes(nameFilter.toLowerCase())));
 
     setRows(categoriesRows);   
   }
@@ -116,22 +116,26 @@ export default function Categories() {
     return true;
   }
   
-
   const handleCloseAddCategory = () => {   
     setName("");
     setNewlyOpened(true);
   }
 
-  const handleDeleteCategoryClick = (row: IRow) => {
+  const handleDeleteCategoryClick = async (row: IRow) => {
     if (!userIsAdmin) {
-      setToastMessage({type: "error", message: "Somente administradores podem remover categorias"})
+      setToastMessage({type: "error", message: "Somente administradores podem desativa/ativar categorias"})
       return;
     }
 
-    const categoriesRows = rows.filter(r => r.data[0] !== row.data[0])
-    setRows(categoriesRows);
+    const response = await ActivateDeactivateCategory(Number.parseInt(row.data[0].toString()))
+    if (response.success) {
+      setReload(true);
 
-    setReload(true);
+      setToastMessage({type: "success", message:  `Categoria ${row.active ? "desativada" : "ativada"} com sucesso`});
+    }
+    else {
+      setToastMessage({type: "error", message:  response.message || `Erro ao ${row.active ? "desativar" : "ativar"} a categoria, tente novamente`});
+    }
   }
 
   const handleEditCategoryAction = (row: IRow) => {

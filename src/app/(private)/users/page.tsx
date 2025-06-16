@@ -9,7 +9,7 @@ import { FormGroup, FormControlLabel, Checkbox, Drawer } from '@mui/material';
 import DefaultSkeleton from '@/components/DefaultSkeleton';
 import Button from "@/components/Button";
 import Toast, { DispatchToast, DispatchToastProps } from '@/components/Toast';
-import { CreateUser, EditUser, FindUsersRows, ParseToIRow, UserData } from '@/services/users-service';
+import { ActivateDeactivateUser, CreateUser, EditUser, FindUsersRows, ParseToIRow, UserData } from '@/services/users-service';
 
 
 function FilterDialog(props: {
@@ -152,10 +152,16 @@ export default function Users() {
     setOpenDrawer(true)    
   }
   
-  const handleDeleteUserClick = (row: IRow) => {
-    // rows = rows.filter(r => r.data[0] !== row.data[0])
-    console.log('row: ', row);
-    setReload(true);
+  const handleDeleteUserClick = async (row: IRow) => {
+    const response = await ActivateDeactivateUser(Number.parseInt(row.data[0].toString()))
+    if (response.success) {
+      setReload(true);
+
+      setToastMessage({type: "success", message:  `Usuário ${row.active ? "desativado" : "ativado"} com sucesso`});
+    }
+    else {
+      setToastMessage({type: "error", message:  response.message || `Erro ao ${row.active ? "desativar" : "ativar"} o usuário, tente novamente`});
+    }
   }
 
   const handleEditCategoryAction = (row: IRow) => {

@@ -9,7 +9,7 @@ import InputText from "@/components/InputText";
 import Combo from "@/components/Combo";
 import { Drawer, FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import Button from "@/components/Button";
-import { CreateEquipment, EditEquipment, EquipmentData, FindEquipmentsRows, ParseToIRow } from "@/services/equipments-service";
+import { ActivateDeactivateEquipment, CreateEquipment, EditEquipment, EquipmentData, FindEquipmentsRows, ParseToIRow } from "@/services/equipments-service";
 import { CategoryData, FindCategoriesRows } from "@/services/categories-service";
 import Toast, { DispatchToast, DispatchToastProps } from "@/components/Toast";
 import { getCookie } from "cookies-next";
@@ -212,15 +212,21 @@ export default function Equipments() {
     setIsEdit(false);
   }
 
-  const handleDeleteEquipmentClick = (row: IRow) => {
+  const handleDeleteEquipmentClick = async (row: IRow) => {
     if (!userIsAdmin) {
       setToastMessage({type: "error", message: "Somente administradores podem remover equipamentos"})
       return;
     }
 
-    // rows = rows.filter(r => r.data[0] !== row.data[0])
-    console.log(row);
-    setReload(true);
+    const response = await ActivateDeactivateEquipment(Number.parseInt(row.data[0].toString()))
+    if (response.success) {
+      setReload(true);
+
+      setToastMessage({type: "success", message:  `Equipamento ${row.active ? "desativado" : "ativado"} com sucesso`});
+    }
+    else {
+      setToastMessage({type: "error", message:  response.message || `Erro ao ${row.active ? "desativar" : "ativar"} o equipamento, tente novamente`});
+    }
   }
 
   const handleEditEquipmentAction = (row: IRow) => {

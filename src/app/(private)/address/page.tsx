@@ -9,7 +9,7 @@ import DefaultSkeleton from "@/components/DefaultSkeleton";
 import DefaultActions from "@/components/DefaultActions";
 import InputText from "@/components/InputText";
 import Button from "@/components/Button";
-import { AddressData, CreateBuild, CreateRoom, EditBuild, FindBuildAddressRows, ParseToIRow, ParseToRoomIRow } from "@/services/address-service";
+import { ActivateDeactivateBuild, ActivateDeactivateRoom, AddressData, CreateBuild, CreateRoom, EditBuild, FindBuildAddressRows, ParseToIRow, ParseToRoomIRow } from "@/services/address-service";
 import Toast, { DispatchToastProps, DispatchToast } from "@/components/Toast";
 
 function rowActions(onClickAction:  React.Dispatch<React.SetStateAction<boolean>>) {
@@ -175,18 +175,28 @@ export default function Address() {
     setNewlyOpened(true);
   }
 
-  const handleDeleteBuildClick = (row: IRow) => {
-    console.log('row: ', row);
-    // rows = rows.filter(r => r.data[0] !== row.data[0])
+  const handleDeleteBuildClick = async (row: IRow) => {
+    const response = await ActivateDeactivateBuild(Number.parseInt(row.data[0].toString()))
+    if (response.success) {
+      setReload(true);
 
-    setReload(true);
+      setToastMessage({type: "success", message:  `Bloco ${row.active ? "desativado" : "ativado"} com sucesso`});
+    }
+    else {
+      setToastMessage({type: "error", message:  response.message || `Erro ao ${row.active ? "desativar" : "ativar"} o bloco, tente novamente`});
+    }
   }
 
-  const handleDeleteRoomClick = (row: IRow) => {
-    if (buildRows[0].subList?.rows)
-      buildRows[0].subList.rows = buildRows[0].subList.rows.filter(r => r[0] !== row.data[0])
+  const handleDeleteRoomClick = async (row: IRow) => {
+    const response = await ActivateDeactivateRoom(Number.parseInt(row.data[0].toString()))
+    if (response.success) {
+      setReload(true);
 
-    setReload(true);
+      setToastMessage({type: "success", message:  `Sala/Laboratório ${row.active ? "desativado" : "ativado"} com sucesso`});
+    }
+    else {
+      setToastMessage({type: "error", message:  response.message || `Erro ao ${row.active ? "desativar" : "ativar"} o sala/laboratório, tente novamente`});
+    }
   }
 
   const handleEditBuildAction = (row: IRow) => {

@@ -6,7 +6,8 @@ export interface UserData {
   nome: string,
   email: string,
   senha: string,
-  admin: boolean
+  admin: boolean,
+  ativo: boolean
 }
 
 interface FindUsersRowsReply {
@@ -27,7 +28,8 @@ export async function FindUsersRows(): Promise<FindUsersRowsReply> {
         nome: x.nome,
         email: x.email,
         senha: x.senha,
-        admin: !!x.admin
+        admin: !!x.admin,
+        ativo: !!x.ativo
       } as UserData 
     })
   }
@@ -41,6 +43,10 @@ export async function EditUser(id: number, nome: string, email: string, admin: b
   return  BasePostRequest('/usuario/atualizar', { id, nome, email, admin, senha });
 }
 
+export async function ActivateDeactivateUser(id: number): Promise<BasePostReply>  {
+  return  BasePostRequest('/usuario/atualizar/status', { id });
+}
+
 export function ParseToIRow(data: UserData[]): IRow[] {
-  return data.map(x => { return { data: [ x.id, x.nome, x.email, x.admin ]} as IRow})
+  return data.map(x => { return { data: [ x.id, x.nome, x.email, x.admin ], active: x.ativo} as IRow})
 }

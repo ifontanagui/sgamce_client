@@ -1,8 +1,10 @@
+import { IRow } from "@/components/Table";
 import {  BaseGetRowsRequest, BasePostReply, BasePostRequest } from "./base-service";
 
 export interface CategoryData {
   id: number,
-  nome: string
+  nome: string,
+  ativo: boolean
 }
 interface FindCategoriesRowsReply {
   success: boolean,
@@ -16,7 +18,13 @@ export async function FindCategoriesRows(): Promise<FindCategoriesRowsReply> {
 
   return {
     success: true,
-    data: reply.data as CategoryData[]
+    data: reply.data.map(x => {
+      return {
+        id: x.id,
+        nome: x.nome,
+        ativo: x.ativo
+      }
+    }) as CategoryData[]
   }
 } 
 
@@ -26,4 +34,12 @@ export async function CreateCategory(nome: string): Promise<BasePostReply> {
 
 export async function EditCategory(id: number, nome: string): Promise<BasePostReply> {
   return BasePostRequest('/categoria/atualizar', { id, nome })
+}
+
+export async function ActivateDeactivateCategory(id: number): Promise<BasePostReply>  {
+  return  BasePostRequest('/categoria/atualizar/status', { id });
+}
+
+export function ParseToIRow(data: CategoryData[]): IRow[] {
+  return data.map(x => {  return {data: [x.id, x.nome], active: x.ativo} as IRow})
 }

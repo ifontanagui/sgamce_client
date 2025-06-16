@@ -4,7 +4,7 @@ import { BaseGetRowsRequest, BasePostReply, BasePostRequest } from "./base-servi
 export interface AddressData {
   id: number,
   nome: string,
-  ativo: number
+  ativo: boolean
   rooms: RoomData[]
 }
 interface RoomData {
@@ -12,7 +12,7 @@ interface RoomData {
   nome: string
   sigla: string,
   sala: string
-  ativo: number
+  ativo: boolean
 }
 interface FindAddressRowsReply {
   success: boolean,
@@ -32,13 +32,13 @@ export async function FindBuildAddressRows(): Promise<FindAddressRowsReply> {
     }
   };
 
-  let data = replyBuilds.data.map(x => { return { ...x, rooms: [] } })
+  let data = replyBuilds.data.map(x => { return { ...x, ativo: !!x.ativo, rooms: [] } })
 
   replyRooms.data.forEach(room => {
     const build = data.find(x => x.id === room.id_bloco.id);
 
     if (build) {
-      build.rooms.push(room);
+      build.rooms.push({...room, ativo: !!room.ativo});
       
       data = [
         ...data.filter(x => x.id !== build.id),
@@ -65,6 +65,14 @@ export async function CreateRoom(nome: string, sigla: string, id_bloco: number, 
   return BasePostRequest('/laboratorio', { id_bloco, nome, sigla, sala })
 }
 
+export async function ActivateDeactivateBuild(id: number): Promise<BasePostReply>  {
+  return  BasePostRequest('/bloco/atualizar/status', { id });
+}
+
+export async function ActivateDeactivateRoom(id: number): Promise<BasePostReply>  {
+  return  BasePostRequest('/laboratorio/atualizar/status', { id });
+}
+
 export function ParseToIRow(data: AddressData[]): IRow[] {
   const builds = [] as IRow[];
 
@@ -73,6 +81,7 @@ export function ParseToIRow(data: AddressData[]): IRow[] {
     
       builds.push({ 
         data: [x.id, x.nome], 
+        active: x.ativo,
         subList: {
           title: "Laboratórios",
           headers: ["ID", "Sigla", "Nome", "Sala"],
@@ -85,5 +94,5 @@ export function ParseToIRow(data: AddressData[]): IRow[] {
 }
 
 export function ParseToRoomIRow(data: RoomData[]): IRow[] {
-  return data.map(x => { return { data: [ x.id, x.sigla, x.nome, x.sala ] } })
+  return data.map(x => { return { data: [ x.id, x.sigla, x.nome, x.sala ], active: x.ativo } })
 }

@@ -12,6 +12,7 @@ export interface EquipmentData {
   periodicidade_manutencao: number,
   tipo: string,
   aviso_renovacao_calibracao: number,
+  ativo: boolean
   id_categoria: {
     nome: string
     id: string
@@ -29,7 +30,12 @@ export async function FindEquipmentsRows(): Promise<FindEquipmentsRowsReply> {
   
     return {
       success: true,
-      data: reply.data as EquipmentData[]
+      data: reply.data.map(x => {
+        return {
+          ...x,
+          ativo: !!x.ativo
+        }
+      }) as EquipmentData[]
     }
 } 
 
@@ -96,6 +102,10 @@ export async function EditEquipment(
    })
 }
 
+export async function ActivateDeactivateEquipment(id: number): Promise<BasePostReply>  {
+  return  BasePostRequest('/modelo/atualizar/status', { id });
+}
+
 export function ParseToIRow(data: EquipmentData[]): IRow[] {
-  return data.map(x =>{ return {data: [x.id, x.equipamento, x.id_categoria?.nome, x.marca, x.periodicidade_calibracao, x.periodicidade_manutencao]} as IRow});
+  return data.map(x =>{ return {data: [x.id, x.equipamento, x.id_categoria?.nome, x.marca, x.periodicidade_calibracao, x.periodicidade_manutencao], active: x.ativo} as IRow});
 }
