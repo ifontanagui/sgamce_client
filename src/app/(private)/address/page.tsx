@@ -125,10 +125,10 @@ export default function Address() {
         setIsEdit(false);
         handleCloseAddBuild();
 
-        setToastMessage({type: "success", message:  "Categoria editada com sucesso!"})
+        setToastMessage({type: "success", message:  "Prédio editado com sucesso!"})
       }
       else {
-        setToastMessage({type: "error", message:  response.message || "Erro ao editar a categoria, tente novamente"});
+        setToastMessage({type: "error", message:  response.message || "Erro ao editar o prédio, tente novamente"});
       }
 
       return response.success;
@@ -140,10 +140,10 @@ export default function Address() {
         setIsEdit(false);
         handleCloseAddBuild();
 
-        setToastMessage({type: "success", message:  "Categoria criada com sucesso"});
+        setToastMessage({type: "success", message:  "Prédio criado com sucesso"});
       }
       else {
-        setToastMessage({type: "error", message:  response.message || "Erro ao cadastrar a categoria, tente novamente"});
+        setToastMessage({type: "error", message:  response.message || "Erro ao cadastrar o prédio, tente novamente"});
       }
 
       return response.success;
@@ -160,6 +160,7 @@ export default function Address() {
       setRoomCode("");
       setRoomNumber(null)
       setReload(true);
+      setToastMessage({type: "success", message:  "Laboratório/Sala criada com sucesso"});
     }    
     else {
       setToastMessage({type: "error", message:  response.message || "Erro ao cadastrar a sala/laboratório, tente novamente"});
@@ -207,7 +208,8 @@ export default function Address() {
   }
 
   return (
-    reload
+    <>
+    {reload
       ? <DefaultSkeleton />
       : <div className="rooms">
           <div className="rooms-header">
@@ -338,7 +340,8 @@ export default function Address() {
               </div>
             </div>
           </Dialog>
-          <Toast />
-        </div>
+        </div>}
+        <Toast />
+        </>
   )
 }

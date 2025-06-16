@@ -156,7 +156,8 @@ export default function Categories() {
   }
   
   return (
-      reload
+    <>
+      {reload
         ? <DefaultSkeleton />
         : <div className="categories">
             <div className="categories-header">
@@ -206,7 +207,8 @@ export default function Categories() {
                 />
               </div>
             </Drawer>
-            <Toast />
-          </div>
+          </div>}
+          <Toast />
+        </>
   )
 }

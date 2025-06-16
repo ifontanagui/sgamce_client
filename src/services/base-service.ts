@@ -45,8 +45,8 @@ export async function BaseGetRowRequest(path: string): Promise<BaseInternalGetRo
       success: true,
       data: data.DATA
     }
-}
-catch(err) {
+  }
+  catch(err) {
     console.error(err);
     return { success: false, data: [] }
   }

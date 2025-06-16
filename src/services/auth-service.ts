@@ -12,20 +12,26 @@ interface LoginReply {
 }
 
 export async function Login(email: string, password: string): Promise<LoginReply> {
-  const { data } = await api.post('/login', {
-    email,
-    senha: password
-  });
+  try {
+    const { data } = await api.post('/login', {
+      email,
+      senha: password
+    });
 
-  if (!data.success) 
+    if (!data.success) 
+      return {
+        success: false,
+        message: data.message
+      } as LoginReply
+    
     return {
-      success: false,
-      message: data.message
+      success: true,
+      token: data.token,
+      payload: data.payload
     } as LoginReply
-  
-  return {
-    success: true,
-    token: data.token,
-    payload: data.payload
-  } as LoginReply
+  }
+  catch(err) {
+    console.error(err);
+    return { success: false }
+  }
 }

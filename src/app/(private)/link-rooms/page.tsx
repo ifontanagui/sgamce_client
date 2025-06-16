@@ -401,9 +401,9 @@ export default function Rooms() {
               />
             </div>
           </Drawer>
-          <Toast />
         </>
       }
+    <Toast />
     </div>
   )
 }

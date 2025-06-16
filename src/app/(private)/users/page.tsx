@@ -166,7 +166,8 @@ export default function Users() {
 
 
   return (
-    reload
+    <>
+    {reload
       ? <DefaultSkeleton />
       : <div className="users">
           <div className="users-header">
@@ -261,7 +262,8 @@ export default function Users() {
               />
             </div>
           </Drawer>
-          <Toast />
-        </div>
+        </div>}
+        <Toast />
+      </>
   )
 }

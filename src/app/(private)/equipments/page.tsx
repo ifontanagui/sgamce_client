@@ -173,10 +173,10 @@ export default function Equipments() {
         setIsEdit(false);
         handleCloseAddEquipment();
 
-        setToastMessage({type: "success", message:  "Categoria editada com sucesso!"})
+        setToastMessage({type: "success", message:  "Equipamento editado com sucesso!"})
       }
       else {
-        setToastMessage({type: "error", message:  response.message || "Erro ao editar a categoria, tente novamente"});
+        setToastMessage({type: "error", message:  response.message || "Erro ao editar o equipamento, tente novamente"});
       }
 
       return response.success;
@@ -188,10 +188,10 @@ export default function Equipments() {
         setIsEdit(false);
         handleCloseAddEquipment();
 
-        setToastMessage({type: "success", message:  "Categoria criada com sucesso"});
+        setToastMessage({type: "success", message:  "Equipamento criado com sucesso"});
       }
       else {
-        setToastMessage({type: "error", message:  response.message || "Erro ao cadastrar a categoria, tente novamente"});
+        setToastMessage({type: "error", message:  response.message || "Erro ao cadastrar o equipamento, tente novamente"});
       }
 
       return response.success;
@@ -230,7 +230,8 @@ export default function Equipments() {
   }
 
   return (
-    reload
+    <>
+    {reload
       ? <DefaultSkeleton />
       : <div className="equipments">
           <div className="equipments-header">
@@ -386,8 +387,9 @@ export default function Equipments() {
               />
             </div>
           </Drawer>
-          <Toast />
-        </div>
+        </div>}
+        <Toast />
+      </>
   );
 }
 
