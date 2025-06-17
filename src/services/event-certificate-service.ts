@@ -10,13 +10,11 @@ export interface EquipmentEventData {
   events: EventData[]
 }
 export interface EventData {
-  evento: {
-    id: number,
-    tipo: string,
-    data_agendada: string,
-    descricao: string,
-    custo: number
-  }
+  id: number,
+  tipo: string,
+  data_agendada: string,
+  descricao: string,
+  custo: number
   certificado: {
     id: number,
     numero: number,
@@ -30,12 +28,18 @@ interface FindEquipmentsRowsReply {
 }
 
 export async function FindEquipmentsRows():Promise<FindEquipmentsRowsReply> {
-  const [replyEvents, replyEquipments] = await  Promise.all([
+  const [replyEvents, replyEquipments, replyCertificate] = await  Promise.all([
     BaseGetRowsRequest('/eventos'),
     BaseGetRowsRequest('/equipamentos'),
+    BaseGetRowsRequest('/certificados'),
   ])
 
-  if (!replyEvents.success || !replyEquipments.success) return replyEvents;
+  if (!replyEvents.success || !replyEquipments.success || !replyCertificate) {
+    return {
+      success: false,
+      data: []
+    }
+  }
 
   const data = replyEquipments.data.map(x => { 
     return {
@@ -45,10 +49,17 @@ export async function FindEquipmentsRows():Promise<FindEquipmentsRowsReply> {
       numero_patrimonio: x.numero_patrimonio,
       events: replyEvents.data
         .filter(e => e.id_equipamento.id === x.id)
-        .map(e => { return { 
-          evento: {...e, data_agendada: APIToView(e.data_agendada)}, 
-          certificado: null 
-        } })
+        .map(e => { 
+          const certificate = replyCertificate.data.find(c => c.id_evento.id === e.id);
+          if (certificate) 
+            certificate.data = APIToView(certificate.data);
+
+          return { 
+            ...e, 
+            data_agendada: APIToView(e.data_agendada),
+            certificado:  certificate
+          }
+        })
     } as EquipmentEventData
   });
 
@@ -75,6 +86,25 @@ export async function CreateEvent(
   })
 }
 
+export async function EditEvent(
+  id: number,
+  tipo: string, 
+  data_agendada: string,
+  descricao: string,
+  custo: number, 
+  id_equipamento: number
+): Promise<BasePostReply> {
+  return BasePostRequest('/evento/atualizar', { 
+    id,
+    tipo,
+    data_agendada: ViewToAPI(data_agendada),
+    descricao,
+    custo,
+    id_equipamento,
+    data_criacao: null
+  })
+}
+
 export async function CreateCertificate(
   numero: number, 
   data: string,
@@ -82,6 +112,21 @@ export async function CreateCertificate(
   id_evento: number
 ): Promise<BasePostReply> {
   return BasePostRequest('/certificado', { 
+    numero,
+    data: ViewToAPI(data),
+    orgao_expedidor,
+    id_evento,
+    arquivo: null
+  })
+}
+
+export async function EditCertificate(
+  numero: number, 
+  data: string,
+  orgao_expedidor: string,
+  id_evento: number
+): Promise<BasePostReply> {
+  return BasePostRequest('/certificado/atualizar', { 
     numero,
     data: ViewToAPI(data),
     orgao_expedidor,
@@ -101,7 +146,7 @@ export function ParseToEquipmentIRow(data: EquipmentEventData[]): IRow[] {
 export function ParseToEventIRow(data: EventData[]): IRow[] {
   return data.map(x => {
     return {
-      data: [ x.evento.id, x.evento.tipo, x.evento.data_agendada, , x.evento.descricao, `R$ ${x.evento.custo}` ],
+      data: [ x.id, x.tipo, x.data_agendada, , x.descricao, `R$ ${x.custo}` ],
       subList: {
         title: 'Certificado',
         headers: [ 'ID', 'Número', 'Data', 'Og. Expedidor' ],

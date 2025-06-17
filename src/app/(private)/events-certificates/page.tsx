@@ -13,7 +13,7 @@ import Button from "@/components/Button";
 import Combo from "@/components/Combo";
 import InputDate from "@/components/InputDate";
 import { WorkspacePremium } from "@mui/icons-material";
-import { CreateCertificate, CreateEvent, EquipmentEventData, EventData, FindEquipmentsRows, ParseToEquipmentIRow, ParseToEventIRow } from "@/services/event-certificate-service";
+import { CreateCertificate, CreateEvent, EditCertificate, EditEvent, EquipmentEventData, EventData, FindEquipmentsRows, ParseToEquipmentIRow, ParseToEventIRow } from "@/services/event-certificate-service";
 
 function FilterDialog(props: {
   equipmentFilter: string, 
@@ -85,11 +85,13 @@ export default function EventsCertificates() {
 
   const [equipmentId, setEquipmentId] = React.useState(null as EquipmentEventData | null);
   const [eventId, setEventId] = React.useState(0);
+  const [certificateId, setCertificateId] = React.useState(0);
   const [equipmentFilter, setEquipmentFilter ] = React.useState("");
   const [assetNumberFilter, setAssetNumberFilter ] = React.useState(null as number | null);
   const [identifierNumberFilter, setIdentifierNumberFilter ] = React.useState(null as number | null);
   const [openDrawerEvent, setOpenDrawerEvent] = React.useState(false);
   const [openDrawerCertificate, setOpenDrawerCertificate] = React.useState(false);
+  const [isEdit, setIsEdit] = React.useState(false);
   const [toastMessage, setToastMessage] = React.useState({type: "success", message: ""} as DispatchToastProps);
   
   React.useEffect(() => {
@@ -114,6 +116,7 @@ export default function EventsCertificates() {
           setReload(false);
         })().catch(console.error);
       }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [reload]);
     
   React.useEffect(() => {
@@ -132,6 +135,40 @@ export default function EventsCertificates() {
     })().catch(console.error);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [curTab]);
+
+   React.useEffect(() => {
+    (async () => {
+      if (openDrawerEvent) {
+        const event = eventData.find(x => x.id === eventId)
+
+        if (event) {
+          setEventType(event.tipo);
+          setEventDescription(event.descricao);
+          setEventAmount(event.custo);
+          setEventAmendmentDate(event.data_agendada);
+          setIsEdit(true)
+        }
+      }
+    })().catch(console.error);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openDrawerEvent]);
+
+   React.useEffect(() => {
+    (async () => {
+      if (openDrawerCertificate) {
+        const certificate = eventData.find(x => x.id === eventId)?.certificado
+
+        if (certificate) {
+          setCertificateDate(certificate.data)
+          setCertificateIssuingAuthority(certificate.orgao_expedidor);
+          setCertificateNumber(certificate.numero.toString())
+          setCertificateId(certificate.id)
+          setIsEdit(true)
+        }
+      }
+    })().catch(console.error);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openDrawerCertificate]);
   
   React.useEffect(() => {
     DispatchToast(toastMessage);
@@ -142,18 +179,34 @@ export default function EventsCertificates() {
 
     if (!eventType || !eventDescription || !eventAmount || !eventAmendmentDate || !equipmentId) return false;
 
-    const response = await CreateEvent(eventType, eventAmendmentDate, eventDescription, eventAmount, equipmentId.id);
-    if (response.success) {
-      setReload(true);
-      handleCloseAddEvent();
+    if (isEdit) {
+      const response = await EditEvent(eventId, eventType, eventAmendmentDate, eventDescription, eventAmount, equipmentId.id);
+      if (response.success) {
+        setReload(true);
+        handleCloseAddEvent();
 
-      setToastMessage({type: "success", message:  "Evento criado com sucesso!"})
-    }
-    else {
-      setToastMessage({type: "error", message:  response.message || "Erro ao cadastrar o evento, tente novamente"});
-    }
+        setToastMessage({type: "success", message:  "Evento editado com sucesso!"})
+      }
+      else {
+        setToastMessage({type: "error", message:  response.message || "Erro ao editar o evento, tente novamente"});
+      }
 
-    return response.success;
+      return response.success;
+    }
+    else  {
+      const response = await CreateEvent(eventType, eventAmendmentDate, eventDescription, eventAmount, equipmentId.id);
+      if (response.success) {
+        setReload(true);
+        handleCloseAddEvent();
+
+        setToastMessage({type: "success", message:  "Evento criado com sucesso!"})
+      }
+      else {
+        setToastMessage({type: "error", message:  response.message || "Erro ao cadastrar o evento, tente novamente"});
+      }
+
+      return response.success;
+    }
   }
 
   const handleCloseAddEvent = () => {
@@ -163,6 +216,7 @@ export default function EventsCertificates() {
     setEventAmendmentDate("");
     setOpenDrawerEvent(false);
     setNewlyOpened(true);
+    setIsEdit(false);
   }
 
   const handleAddCertificateClick = async () => {    
@@ -170,18 +224,34 @@ export default function EventsCertificates() {
 
     if (!certificateNumber || !certificateDate || !certificateIssuingAuthority) return false;
 
-    const response = await CreateCertificate(Number.parseInt(certificateNumber), certificateDate, certificateIssuingAuthority, eventId);
-    if (response.success) {
-      setReload(true);
-      handleCloseAddCertificate();
+    if (isEdit) {
+      const response = await EditCertificate(certificateId, Number.parseInt(certificateNumber), certificateDate, certificateIssuingAuthority, eventId);
+      if (response.success) {
+        setReload(true);
+        handleCloseAddCertificate();
 
-      setToastMessage({type: "success", message:  "Evento criado com sucesso!"})
+        setToastMessage({type: "success", message:  "Certificado editado com sucesso!"})
+      }
+      else {
+        setToastMessage({type: "error", message:  response.message || "Erro ao editar o certificado, tente novamente"});
+      }
+
+      return response.success;
     }
     else {
-      setToastMessage({type: "error", message:  response.message || "Erro ao cadastrar o evento, tente novamente"});
-    }
+      const response = await CreateCertificate(Number.parseInt(certificateNumber), certificateDate, certificateIssuingAuthority, eventId);
+      if (response.success) {
+        setReload(true);
+        handleCloseAddCertificate();
 
-    return response.success;
+        setToastMessage({type: "success", message:  "Certificado criado com sucesso!"})
+      }
+      else {
+        setToastMessage({type: "error", message:  response.message || "Erro ao cadastrar o certificado, tente novamente"});
+      }
+
+      return response.success;
+    }
   }
 
   const handleCloseAddCertificate = () => {
@@ -189,6 +259,8 @@ export default function EventsCertificates() {
     setCertificateDate("")
     setCertificateIssuingAuthority("");
     setCertificateNumber("")
+    setIsEdit(false);
+    setOpenDrawerCertificate(false)
   }
 
   return (
@@ -208,7 +280,7 @@ export default function EventsCertificates() {
                     {!!equipmentId && <Chip className="event-tab-header-chip" label={`${equipmentId.equipamento} - ${equipmentId.tag}`} variant="outlined" />}
                   </div>
                   <DefaultActions 
-                    refreshAction={() => {}}
+                    refreshAction={() => { setReload(true) }}
                     filterAction={() => {}}
                     filtersDialog={
                       FilterDialog({
@@ -229,7 +301,6 @@ export default function EventsCertificates() {
                     className="event-table"
                     rowClick={(row: IRow) => {
                       const equipment = equipmentData.find(x => x.id === Number.parseInt(row.data[0].toString()))
-
                       setEquipmentId(equipment || null);
                     }}
                   />
@@ -252,9 +323,8 @@ export default function EventsCertificates() {
                     rows={eventRows}
                     className="event-table"
                     rowActions={eventRowActions(() => {setOpenDrawerCertificate(true)})}
-                    rowClick={(row: IRow) => {
-                      setEventId(Number.parseInt(row.data[0].toString()));
-                    }}
+                    rowClick={(row: IRow) => { setEventId(Number.parseInt(row.data[0].toString())); }}
+                    editAction={() => { setOpenDrawerEvent(true) }}
                   />
                 </div>
               </div>
@@ -325,12 +395,12 @@ export default function EventsCertificates() {
           anchor='right'
           open={openDrawerCertificate}
           onClose={() => {
-          // handleCloseAddCategory();
+            handleCloseAddCertificate();
             setOpenDrawerCertificate(false);
           }}
         >
           <div className='event-drawer'>
-            <strong className='event-drawer-title'>Cadastrar Certificado</strong>
+            <strong className='event-drawer-title'>Cadastrar/Editar Certificado</strong>
 
             <InputText
               type='number'
@@ -369,9 +439,9 @@ export default function EventsCertificates() {
             />
           </div>
         </Drawer>
-        <Toast />
         </>       
       }
+      <Toast />
     </div>
   )
 }
