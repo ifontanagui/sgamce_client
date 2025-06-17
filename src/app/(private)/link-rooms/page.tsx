@@ -257,7 +257,7 @@ export default function Rooms() {
                 <div className="room-tab-table">
                   <Table
                     headers={['ID', 'Prédio']}
-                    rows={[...buildRows, ...buildRows]}
+                    rows={buildRows}
                     className="rooms-table"
                     rowClick={(row: IRow) => {
                       setBuildId(Number.parseInt(row.data[0].toString()));

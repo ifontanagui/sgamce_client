@@ -179,7 +179,7 @@ export default function Users() {
           <div className="users-header">
             <strong className='users-header-title'>Gerenciamento de Usuários</strong>
             <DefaultActions
-              refreshAction={handleFilterClick}
+              refreshAction={() => {setReload(true)}}
               filtersDialog={FilterDialog({userFilter, setUserFilter})}
               filtersDialogClassName='user-filter-dialog'
               filterAction={handleFilterClick}

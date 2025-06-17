@@ -19,10 +19,10 @@ import { AmountValidate } from "@/utils/amount-validate";
 function FilterDialog(props: {
   equipmentFilter: string, 
   setEquipmentFilter: React.Dispatch<React.SetStateAction<string>>
-  assetNumberFilter: number | null, 
-  setAssetNumberFilter: React.Dispatch<React.SetStateAction<number | null>>
-  identifierNumberFilter: number | null, 
-  setIdentifierNumberFilter: React.Dispatch<React.SetStateAction<number | null>>
+  assetNumberFilter: string, 
+  setAssetNumberFilter: React.Dispatch<React.SetStateAction<string>>
+  identifierNumberFilter: string, 
+  setIdentifierNumberFilter: React.Dispatch<React.SetStateAction<string>>
 }) {
   return (
     <div className="event-filter-dialog">
@@ -38,14 +38,14 @@ function FilterDialog(props: {
         placeholder='Nro. Identificação'
         value={props.assetNumberFilter || ''}
         className='equipment-filter-input'
-        onChange={(event) => { props.setAssetNumberFilter(Number.parseInt(event.target.value)) }}
+        onChange={(event) => { props.setAssetNumberFilter(event.target.value) }}
       />
       <InputText
         type='number'
         placeholder='Nro. Patrimonio'
         value={props.identifierNumberFilter || ''}
         className='equipment-filter-input'
-        onChange={(event) => { props.setIdentifierNumberFilter(Number.parseInt(event.target.value)) }}
+        onChange={(event) => { props.setIdentifierNumberFilter(event.target.value) }}
       />
     </div>
   )
@@ -89,8 +89,8 @@ export default function EventsCertificates() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [certificateId, setCertificateId] = React.useState(0);
   const [equipmentFilter, setEquipmentFilter ] = React.useState("");
-  const [assetNumberFilter, setAssetNumberFilter ] = React.useState(null as number | null);
-  const [identifierNumberFilter, setIdentifierNumberFilter ] = React.useState(null as number | null);
+  const [assetNumberFilter, setAssetNumberFilter ] = React.useState("");
+  const [identifierNumberFilter, setIdentifierNumberFilter ] = React.useState("");
   const [openDrawerEvent, setOpenDrawerEvent] = React.useState(false);
   const [openDrawerCertificate, setOpenDrawerCertificate] = React.useState(false);
   const [isEdit, setIsEdit] = React.useState(false);
@@ -98,6 +98,10 @@ export default function EventsCertificates() {
   
   React.useEffect(() => {
       if (reload) {
+        setAssetNumberFilter("");
+        setEquipmentFilter("")
+        setIdentifierNumberFilter("");
+
         (async () => {
           const equipmentsRowsReply = await FindEquipmentsRows();
           setEquipmentData(equipmentsRowsReply.data);
@@ -266,6 +270,24 @@ export default function EventsCertificates() {
     setOpenDrawerCertificate(false)
     setCertificateId(0)
   }
+  
+  const handleFilterClick = async () => {
+    let data = equipmentData
+
+    if (equipmentFilter) {
+      data = data.filter(x => x.equipamento.toLocaleLowerCase().includes(equipmentFilter.toLowerCase()))
+    };
+
+    if (assetNumberFilter?.toString()) {
+      data = data.filter(x => x.tag.toString().includes(assetNumberFilter.toString()))
+    }
+
+    if (identifierNumberFilter?.toString()) {
+      data = data.filter(x => x.numero_patrimonio.toString().includes(identifierNumberFilter.toString()))
+    }
+
+    setEquipmentRows(ParseToEquipmentIRow(data))
+  }
 
   return (
     <div className="events">
@@ -285,7 +307,7 @@ export default function EventsCertificates() {
                   </div>
                   <DefaultActions 
                     refreshAction={() => { setReload(true) }}
-                    filterAction={() => {}}
+                    filterAction={handleFilterClick}
                     filtersDialog={
                       FilterDialog({
                         equipmentFilter,
