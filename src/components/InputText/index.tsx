@@ -42,7 +42,12 @@ export default function InputText(props: InputTextProps) {
       }
       <TextField 
         className="input-text-input"
-        type={props.type !== "password" || !showPassword ? props.type : "text"}
+        type={props.type !== "password" || !showPassword
+          ? props.type !== "amount"
+            ? props.type 
+            : "text"
+          : "text"
+        }
         label={props.placeholder} 
         required={props.required}
         error={props.error}

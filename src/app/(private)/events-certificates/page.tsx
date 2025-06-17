@@ -14,6 +14,7 @@ import Combo from "@/components/Combo";
 import InputDate from "@/components/InputDate";
 import { WorkspacePremium } from "@mui/icons-material";
 import { CreateCertificate, CreateEvent, EditCertificate, EditEvent, EquipmentEventData, EventData, FindEquipmentsRows, ParseToEquipmentIRow, ParseToEventIRow } from "@/services/event-certificate-service";
+import { AmountValidate } from "@/utils/amount-validate";
 
 function FilterDialog(props: {
   equipmentFilter: string, 
@@ -76,7 +77,7 @@ export default function EventsCertificates() {
 
   const [eventType, setEventType ] = React.useState("");
   const [eventDescription, setEventDescription ] = React.useState("");
-  const [eventAmount, setEventAmount ] = React.useState(0);
+  const [eventAmount, setEventAmount ] = React.useState("");
   const [eventAmendmentDate, setEventAmendmentDate ] = React.useState("");
   const [certificateNumber, setCertificateNumber ] = React.useState("");
   const [certificateIssuingAuthority, setCertificateIssuingAuthority ] = React.useState("");
@@ -145,7 +146,7 @@ export default function EventsCertificates() {
         if (event) {
           setEventType(event.tipo);
           setEventDescription(event.descricao);
-          setEventAmount(event.custo);
+          setEventAmount(event.custo.toString());
           setEventAmendmentDate(event.data_agendada);
           setIsEdit(true)
         }
@@ -181,7 +182,7 @@ export default function EventsCertificates() {
     if (!eventType || !eventDescription || !eventAmount || !eventAmendmentDate || !equipmentId) return false;
 
     if (isEdit) {
-      const response = await EditEvent(eventId, eventType, eventAmendmentDate, eventDescription, eventAmount, equipmentId.id);
+      const response = await EditEvent(eventId, eventType, eventAmendmentDate, eventDescription, Number.parseFloat(eventAmount), equipmentId.id);
       if (response.success) {
         setReload(true);
         handleCloseAddEvent();
@@ -195,7 +196,7 @@ export default function EventsCertificates() {
       return response.success;
     }
     else  {
-      const response = await CreateEvent(eventType, eventAmendmentDate, eventDescription, eventAmount, equipmentId.id);
+      const response = await CreateEvent(eventType, eventAmendmentDate, eventDescription, Number.parseFloat(eventAmount), equipmentId.id);
       if (response.success) {
         setReload(true);
         handleCloseAddEvent();
@@ -213,7 +214,7 @@ export default function EventsCertificates() {
   const handleCloseAddEvent = () => {
     setEventType("");
     setEventDescription("");
-    setEventAmount(0);
+    setEventAmount("");
     setEventAmendmentDate("");
     setOpenDrawerEvent(false);
     setNewlyOpened(true);
@@ -317,7 +318,7 @@ export default function EventsCertificates() {
                     {!!equipmentId && <Chip className="event-tab-header-chip" label={`${equipmentId.equipamento} - ${equipmentId.tag}`} variant="outlined" />}
                   </div>
                     <DefaultActions 
-                      addAction={() => { setOpenDrawerEvent(true); }}
+                      addAction={() => { setOpenDrawerEvent(true); setEventId(0) }}
                     />
                 </div>
                 <div className="event-tab-table">
@@ -373,7 +374,13 @@ export default function EventsCertificates() {
               className='event-input'
               error={!newlyOpened && !eventAmount}
               helperText="É obrigatório informar o custo do evento"
-              onChange={(event) => { setEventAmount(Number.parseInt(event.target.value)) }}
+              onChange={(event) => { 
+                const value = event.target.value.replace(',', '.')
+
+                if (AmountValidate(value)){                                    
+                  setEventAmount(value) 
+                }
+              }}
             />
             <InputDate 
               label="Dt. Agendamento"
