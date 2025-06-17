@@ -40,7 +40,16 @@ export async function CreateUser(nome: string, email: string, senha: string, adm
 }
 
 export async function EditUser(id: number, nome: string, email: string, admin: boolean, senha: string | null = null): Promise<BasePostReply> {
-  return  BasePostRequest('/usuario/atualizar', { id, nome, email, admin, senha });
+  const userReply = BasePostRequest('/usuario/atualizar', { id, nome, email, admin, senha });
+
+  if (!!senha) {
+    return await BasePostRequest('/usuario/atualizar/senha', { 
+      id,
+      senha  
+    });
+  }
+
+  return userReply;
 }
 
 export async function ActivateDeactivateUser(id: number): Promise<BasePostReply>  {
