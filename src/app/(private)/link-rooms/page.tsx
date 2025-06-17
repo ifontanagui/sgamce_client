@@ -15,6 +15,7 @@ import { FindUsersRows, UserData } from "@/services/users-service";
 import { EquipmentData, FindEquipmentsRows } from "@/services/equipments-service";
 import TabsSkeleton from "@/components/TabsSkeleton";
 import InputDate from "@/components/InputDate";
+import { getCookie } from "cookies-next";
 
 function roomRowActions(
   onClickActionUser:  () => void
@@ -45,6 +46,8 @@ function equipmentRowActions(
 }
 
 export default function Rooms() {
+  const userIsAdmin = JSON.parse(getCookie('payload')?.toString() || "{}").admin || false;
+  
   const [data, setData] = React.useState([] as LinkAddressData[]);
   const [roomsData, setRoomsData] = React.useState([] as RoomData[]);
   const [usersData, setUsersData] = React.useState([] as UserData[])
@@ -77,7 +80,6 @@ export default function Rooms() {
           FindEquipmentsRows()
         ])
           .then(([addressRowsReply, users, equipments]) => {
-            
             setData(addressRowsReply.data)
             setBuildRows(ParseToBuildIRow(addressRowsReply.data));
             setUsersData(users.data);
@@ -97,6 +99,7 @@ export default function Rooms() {
             }
             else if (curTab === 2) {
               const build = addressRowsReply.data.find(x => x.id === buildId);
+              
               if (build){
                 setRoomsData(build.rooms)
                 setRoomRows(ParseToRoomIRow(build.rooms))
@@ -280,6 +283,11 @@ export default function Rooms() {
                     className="rooms-table"
                     rowClick={(row: IRow) => {setRoomId(Number.parseInt(row.data[0].toString()));}}
                     rowActions={roomRowActions(() => {
+                      if (!userIsAdmin) {
+                        setToastMessage({type: "error", message: "Somente administradores podem vincular usuários"})
+                        return;
+                      }
+
                       setOpenAddUser(true);
                       setOpenAddUserForm(false);
                     })}
@@ -294,7 +302,9 @@ export default function Rooms() {
                     {!!buildId && <Chip className="room-chip" label={buildRows.find(x => x.data[0] === buildId)?.data[1]} variant="outlined" />}
                     {!!roomId && <Chip className="room-chip" label={roomRows.find(x => x.data[0] === roomId)?.data[1]} variant="outlined" />}
                   </div>
-                  {equipmentRowActions(() => {setOpenAddMachineForm(true);})}
+                  {equipmentRowActions(() => {
+                    setOpenAddMachineForm(true)
+                  })}
                 </div>
                 <div className="room-tab-table">
                   <Table

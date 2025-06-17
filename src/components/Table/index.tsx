@@ -170,7 +170,7 @@ export default function Table({ headers, rows, editAction, deleteAction, classNa
               {haveSubList && <TableCell className='table-header' />}
               {rows.length > 0 &&
                 <>
-                  {deleteAction && <TableCell className='table-header' />}
+                  {rows[0].active !== undefined && deleteAction && <TableCell className='table-header' />}
                   {editAction && <TableCell className='table-header' />}
                   {rowActions && <TableCell className='table-header' />}
                 </>

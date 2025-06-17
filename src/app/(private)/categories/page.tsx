@@ -139,11 +139,6 @@ export default function Categories() {
   }
 
   const handleEditCategoryAction = (row: IRow) => {
-    if (!userIsAdmin) {
-      setToastMessage({type: "error", message: "Somente administradores podem editar categorias"})
-      return;
-    }
-
     setId(Number.parseInt(row.data[0].toString()));
     setName(row.data[1].toString());
     setOpenDrawer(true);
@@ -199,9 +194,11 @@ export default function Categories() {
                   error={!newlyOpened && !name}
                   helperText='É obrigatório informar o nome da categoria'
                   onChange={(event) => { setName(event.target.value) }}
+                  disabled={!userIsAdmin}
                 />
                 <Button 
                   className="save-button"
+                  disabled={!userIsAdmin}
                   onClick={async () => {
                     const result = await handleAddUCategoryClick();
                     if (result)

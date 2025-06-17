@@ -44,10 +44,10 @@ interface FindBuildsRowsReply {
 
 export async function FindRows(): Promise<FindBuildsRowsReply> {
   const [replyRooms, replyEquipments, replyUsers] = await Promise.all([
-      BaseGetRowsRequest('/laboratorios'),
-      BaseGetRowsRequest('/equipamentos'),
-      BaseGetRowsRequest('/usuarios'),
-    ])
+    BaseGetRowsRequest('/laboratorios'),
+    BaseGetRowsRequest('/equipamentos'),
+    BaseGetRowsRequest('/usuarios'),
+  ])
 
   if (!replyRooms.success || !replyEquipments.success || !replyUsers.success ) {
     return {
@@ -57,6 +57,13 @@ export async function FindRows(): Promise<FindBuildsRowsReply> {
   }
   
   let data = [] as LinkAddressData[]  
+
+  if (!replyRooms.data || !Array.isArray(replyRooms.data)) {
+    return {
+      success: true,
+      data
+    }
+  }
 
   replyRooms.data.forEach(x => {
     const build = data.find(b => b.id === x.id_bloco.id)
@@ -133,7 +140,7 @@ export async function FindRows(): Promise<FindBuildsRowsReply> {
     for(const x of data) {
       if (room) continue;
       
-      const r = x.rooms.find(y => e.id_laboratorio && y.id === e.id_laboratorio.id) || null
+      const r = x.rooms.find(y => e.id_laboratorio && y.id === e.id_laboratorio[0].id) || null
       if (r) {
         build = x;
         room = r;

@@ -11,12 +11,13 @@ import InputText from "@/components/InputText";
 import Button from "@/components/Button";
 import { ActivateDeactivateBuild, ActivateDeactivateRoom, AddressData, CreateBuild, CreateRoom, EditBuild, FindBuildAddressRows, ParseToIRow, ParseToRoomIRow } from "@/services/address-service";
 import Toast, { DispatchToastProps, DispatchToast } from "@/components/Toast";
+import { getCookie } from "cookies-next";
 
-function rowActions(onClickAction:  React.Dispatch<React.SetStateAction<boolean>>) {
+function rowActions(onClickAction: () => void) {
   return (
     <div className="add-room-action">
       <Tooltip title="Adicionar Laboratórios/Salas"> 
-        <IconButton onClick={() => { onClickAction(true)} }>
+        <IconButton onClick={onClickAction}>
           <AddLocation className="add-room-action-icon"/>
         </IconButton>
       </Tooltip>
@@ -43,6 +44,8 @@ function FilterDialog(props: {
 
 
 export default function Address() {  
+  const userIsAdmin = JSON.parse(getCookie('payload')?.toString() || "{}").admin || false;
+  
   const [data, setData] = React.useState([] as AddressData[]);
   const [buildRows, setBuildRows] = React.useState([] as IRow[]);
   const [roomRows, setRoomRows] = React.useState([] as IRow[]);
@@ -176,6 +179,11 @@ export default function Address() {
   }
 
   const handleDeleteBuildClick = async (row: IRow) => {
+    if (!userIsAdmin) {
+      setToastMessage({type: "error", message: "Somente administradores podem desativa/ativar prédios"})
+      return;
+    }
+
     const response = await ActivateDeactivateBuild(Number.parseInt(row.data[0].toString()))
     if (response.success) {
       setReload(true);
@@ -206,6 +214,11 @@ export default function Address() {
   }
 
   const handleAddButtonClick = () => {
+    if (!userIsAdmin) {
+      setToastMessage({ type: "error", message: "Somente administradores podem adicionar prédios" })
+      return;
+    }
+
     setOpenDrawer(true)
     setIsEdit(false);
   }
@@ -238,7 +251,10 @@ export default function Address() {
               className="rooms-table"
               deleteAction={handleDeleteBuildClick}
               editAction={handleEditBuildAction}
-              rowActions={rowActions(() => setOpenAddRoom(true))}
+              rowActions={rowActions(() => {
+                if (!userIsAdmin) setToastMessage({ type: "error", message: "Somente administradores podem manipular laboratórios/salas. Para consultar, expanda a linha" })
+                else setOpenAddRoom(true);
+              })}
               rowClick={(row: IRow) => { 
                 const id = Number.parseInt(row.data[0].toString())
                 const build = data.find(x => x.id === id)
@@ -268,6 +284,7 @@ export default function Address() {
                 error={!newlyOpened && !name}
                 helperText='É obrigatório informar o nome da categoria'
                 onChange={(event) => { setName(event.target.value) }}
+                disabled={!userIsAdmin}
               />
               <Button 
                 className="save-button"
@@ -276,6 +293,7 @@ export default function Address() {
                   if (result)
                     setOpenDrawer(false);
                 }} 
+                disabled={!userIsAdmin}
                 textContent='Salvar'
               />
             </div>

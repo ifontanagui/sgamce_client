@@ -32,20 +32,29 @@ export async function FindBuildAddressRows(): Promise<FindAddressRowsReply> {
     }
   };
 
+  if (!replyBuilds.data || !Array.isArray(replyBuilds.data) || !replyBuilds.data.length) {    
+    return {
+        success: true,
+        data: [] as AddressData[]
+      }
+  }
+  
   let data = replyBuilds.data.map(x => { return { ...x, ativo: !!x.ativo, rooms: [] } })
-
-  replyRooms.data.forEach(room => {
-    const build = data.find(x => x.id === room.id_bloco.id);
-
-    if (build) {
-      build.rooms.push({...room, ativo: !!room.ativo});
+  
+  if (replyRooms.data && Array.isArray(replyRooms.data)) {    
+    replyRooms.data.forEach(room => {
+      const build = data.find(x => x.id === room.id_bloco.id);
       
-      data = [
-        ...data.filter(x => x.id !== build.id),
-        build
-      ]
-    }
-  });
+      if (build) {
+        build.rooms.push({...room, ativo: !!room.ativo});
+        
+        data = [
+          ...data.filter(x => x.id !== build.id),
+          build
+        ]
+      }
+    });
+  }
 
   return {
     success: true,

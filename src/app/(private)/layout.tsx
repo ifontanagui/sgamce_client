@@ -10,7 +10,7 @@ import { deleteCookie, getCookie } from "cookies-next";
 const menuItems = [
   { description: "Categorias", url: "/categories", icon: <Category className="private-layout-header-sub-menu-list-item-icon"/>, onlyAdmin: false },
   { description: "Equipamentos", url: "/equipments", icon: <PrecisionManufacturing className="private-layout-header-sub-menu-list-item-icon"/>, onlyAdmin: false },
-  { description: "Salas e Laboratórios", url: "/address", icon: <Place className="private-layout-header-sub-menu-list-item-icon"/>, onlyAdmin: true },
+  { description: "Salas e Laboratórios", url: "/address", icon: <Place className="private-layout-header-sub-menu-list-item-icon"/>, onlyAdmin: false },
   { description: "Vincular à Salas", url: "/link-rooms", icon: <Cable className="private-layout-header-sub-menu-list-item-icon"/>, onlyAdmin: false },
   { description: "Eventos e Certificados", url: "/events-certificates", icon: <Event className="private-layout-header-sub-menu-list-item-icon"/>, onlyAdmin: false },
 ] as const;
