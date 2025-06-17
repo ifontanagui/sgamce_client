@@ -3,7 +3,7 @@
 import './style.css'
 import React from 'react';
 import { KeyboardArrowUp, Check, Clear, Circle, Edit }  from '@mui/icons-material';
-import { Collapse, IconButton, Table as MUITable, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from '@mui/material';
+import { Collapse, IconButton, Table as MUITable, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tooltip } from '@mui/material';
 
 export interface IRow {
   data: (string | number | boolean)[],
@@ -63,11 +63,15 @@ function Row({ row, withSubList, editAction, deleteAction, emptyTable, rowAction
         <>
           {deleteAction && row.active !== undefined &&
           <TableCell className='table-row-sublist-list-header-cell-icon' >
-            <IconButton onClick={() => deleteAction(row)}><Circle className={!!row.active ? 'active' : 'inactive'} /></IconButton>
+            <Tooltip title={!!row.active ? 'Desativar' : "Ativar"}>
+              <IconButton onClick={() => deleteAction(row)}><Circle className={!!row.active ? 'active' : 'inactive'} /></IconButton>
+            </Tooltip>
           </TableCell>}
           {editAction &&
           <TableCell className='table-row-sublist-list-header-cell-icon' >
-            <IconButton onClick={() => editAction(row)}><Edit className='edit' /></IconButton>
+            <Tooltip title="Editar">
+              <IconButton onClick={() => editAction(row)}><Edit className='edit' /></IconButton>
+            </Tooltip>
           </TableCell>}
           {!!rowActions && <TableCell className='table-row-sublist-list-header-cell-icon' >{rowActions}</TableCell>}
         </>

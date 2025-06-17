@@ -3,7 +3,7 @@
 import "./style.css"
 import React from "react";
 import Table, { IRow } from "@/components/Table";
-import { Dialog, Drawer, IconButton } from "@mui/material";
+import { Dialog, Drawer, IconButton, Tooltip } from "@mui/material";
 import { AddCircleOutline, AddLocation } from "@mui/icons-material";
 import DefaultSkeleton from "@/components/DefaultSkeleton";
 import DefaultActions from "@/components/DefaultActions";
@@ -15,11 +15,11 @@ import Toast, { DispatchToastProps, DispatchToast } from "@/components/Toast";
 function rowActions(onClickAction:  React.Dispatch<React.SetStateAction<boolean>>) {
   return (
     <div className="add-room-action">
-      <IconButton onClick={() => {
-        onClickAction(true)}
-      }>
-        <AddLocation className="add-room-action-icon"/>
-      </IconButton>
+      <Tooltip title="Adicionar Laboratórios/Salas"> 
+        <IconButton onClick={() => { onClickAction(true)} }>
+          <AddLocation className="add-room-action-icon"/>
+        </IconButton>
+      </Tooltip>
     </div>
   )
 }

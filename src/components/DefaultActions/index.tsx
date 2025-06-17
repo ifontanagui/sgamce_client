@@ -3,7 +3,7 @@
 import React, { ReactElement } from 'react';
 import './style.css'
 import { FilterList, RefreshOutlined, AddCircleOutline } from '@mui/icons-material';
-import { Dialog, IconButton } from '@mui/material';
+import { Dialog, IconButton, Tooltip } from '@mui/material';
 import Button from '../Button';
 
 interface DefaultActionsProps {
@@ -19,19 +19,29 @@ export default function DefaultActions(props: DefaultActionsProps) {
 
   return (
     <div className='default-actions'>
-      {props.refreshAction && <IconButton onClick={props.refreshAction}>
+      {props.refreshAction && 
+      <Tooltip title="Recarregar"> 
+        <IconButton onClick={props.refreshAction}>
         <RefreshOutlined className='default-actions-icon' />
-      </IconButton>}
-      {props.filterAction && props.filtersDialog && <IconButton onClick={() => setOpenDialog(true)}>
-        <FilterList className='default-actions-icon' />
-      </IconButton>}
-      {props.addAction && <IconButton onClick={() => {
-        if (props.addAction) {
-          props.addAction();
-        }
-      }}>
-        <AddCircleOutline className='default-actions-icon' />
-      </IconButton>}
+        </IconButton>
+      </Tooltip>
+      }
+      {props.filterAction && props.filtersDialog && 
+      <Tooltip title="Limpar filtros e recarregar"> 
+        <IconButton onClick={() => setOpenDialog(true)}>
+          <FilterList className='default-actions-icon' />
+        </IconButton>
+      </Tooltip>}
+      {props.addAction && 
+      <Tooltip title="Adicionar"> 
+        <IconButton onClick={() => {
+          if (props.addAction) {
+            props.addAction();
+          }
+        }}>
+          <AddCircleOutline className='default-actions-icon' />
+        </IconButton>
+      </Tooltip>}
       <Dialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}

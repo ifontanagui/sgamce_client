@@ -6,7 +6,7 @@ import MultiTabs from "@/components/MultiTabs";
 import Table, { IRow } from "@/components/Table";
 import TabsSkeleton from "@/components/TabsSkeleton";
 import DefaultActions from "@/components/DefaultActions";
-import { Chip, Drawer, IconButton } from "@mui/material";
+import { Chip, Drawer, IconButton, Tooltip } from "@mui/material";
 import InputText from "@/components/InputText";
 import Toast, { DispatchToast, DispatchToastProps } from "@/components/Toast";
 import Button from "@/components/Button";
@@ -55,9 +55,11 @@ function eventRowActions(
 ) {
   return (
     <div className="add-certificate-action">
-      <IconButton onClick={() => onClickActionUser()}>
-        <WorkspacePremium className="add-certificate-action-icon"/>
-      </IconButton>
+      <Tooltip title="Adicionar/editar certificado"> 
+        <IconButton onClick={() => onClickActionUser()}>
+          <WorkspacePremium className="add-certificate-action-icon"/>
+        </IconButton>
+      </Tooltip>
     </div>
   )
 }

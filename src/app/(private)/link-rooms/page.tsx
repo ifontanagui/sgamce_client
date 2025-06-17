@@ -4,7 +4,7 @@ import "./style.css"
 import React from "react";
 import MultiTabs from "@/components/MultiTabs"
 import Table, { IRow } from "@/components/Table";
-import { Chip, Dialog, Drawer, IconButton } from "@mui/material";
+import { Chip, Dialog, Drawer, IconButton, Tooltip } from "@mui/material";
 import { AddCircleOutline, GroupAdd, AddToQueue } from "@mui/icons-material";
 import InputText from "@/components/InputText";
 import Button from "@/components/Button";
@@ -21,9 +21,11 @@ function roomRowActions(
 ) {
   return (
     <div className="add-equipment-action">
-      <IconButton onClick={() => onClickActionUser()}>
-        <GroupAdd className="add-users-action-icon"/>
-      </IconButton>
+      <Tooltip title="Vincular usuário"> 
+        <IconButton onClick={() => onClickActionUser()}>
+          <GroupAdd className="add-users-action-icon"/>
+        </IconButton>
+      </Tooltip>
     </div>
   )
 }
@@ -33,9 +35,11 @@ function equipmentRowActions(
 ) {
   return (
     <div className="add-equipment-action">
-      <IconButton onClick={() => onClickActionUser()}>
-        <AddToQueue className="add-users-action-icon"/>
-      </IconButton>
+      <Tooltip title="Vincular equipamento"> 
+        <IconButton onClick={() => onClickActionUser()}>
+          <AddToQueue className="add-users-action-icon"/>
+        </IconButton>
+      </Tooltip>
     </div>
   )
 }
