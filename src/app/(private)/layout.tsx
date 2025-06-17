@@ -3,9 +3,11 @@
 import React from "react";
 import "./style.css"
 import { useRouter } from 'next/navigation'
-import { IconButton, Menu, MenuItem } from "@mui/material";
-import { AccountCircle, Place, PrecisionManufacturing, KeyboardDoubleArrowDown, Category, Cable, Event } from "@mui/icons-material";
+import { Badge, Dialog, IconButton, Menu, MenuItem } from "@mui/material";
+import { AccountCircle, Place, PrecisionManufacturing, KeyboardDoubleArrowDown, Category, Cable, Event, Notifications } from "@mui/icons-material";
 import { deleteCookie, getCookie } from "cookies-next";
+import { FindAlertsRows } from "@/services/notifications-service";
+import Table, { IRow } from "@/components/Table";
 
 const menuItems = [
   { description: "Categorias", url: "/categories", icon: <Category className="private-layout-header-sub-menu-list-item-icon"/>, onlyAdmin: false },
@@ -28,7 +30,16 @@ export default function PrivateLayout({
   const [openMenu, setOpenMenu] = React.useState(true);
   const [openUserMenu, setOpenUserMenu] = React.useState(false);
   const [anchorUserMenu, setAnchorUserMenu] = React.useState<null | HTMLElement>(null);
+  const [alertsData, setAlertsData] = React.useState([] as IRow[]);
+  const [openDialog, setOpenDialog] = React.useState(false);
   
+  React.useEffect(() => {
+    (async () => {
+      const reply = await FindAlertsRows();
+      setAlertsData(reply.data?.map(x => { return { data: [ x.Status, x.Sigla, x.Equipamento, x.TAG, x.CertificadoExpiraEm ], active: x.CertificadoExpiraEm > 0 } }) || []);
+    })().catch(console.error);
+  }, []);
+
   return (
     <div className={`private-layout`}>
       <div className={`private-layout-screen-header`}>
@@ -37,7 +48,15 @@ export default function PrivateLayout({
             <KeyboardDoubleArrowDown className={`private-layout-header-menu-icon ${openMenu && "open"}`} />
           </IconButton>
           <strong className="private-layout-header-text" onClick={() => {router.push("/")}}>SGAMCE</strong>
-          <div>
+          <div className="private-layout-header-icons">
+            <IconButton onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+              event.preventDefault();
+              setOpenDialog(true);
+            }} >
+              <Badge badgeContent={alertsData.length}>
+                <Notifications className={`private-layout-header-user-icon`} />
+              </Badge>
+            </IconButton>
             <IconButton onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
               setOpenUserMenu(!openUserMenu);
               setAnchorUserMenu(event.currentTarget);
@@ -80,6 +99,24 @@ export default function PrivateLayout({
         <a target="_blank" rel="noopener noreferrer" href="https://github.com/ifontanagui">Guilherme Fontana</a>
         <span>&nbsp;✌️</span>
       </div>
+        <Dialog
+          open={openDialog}
+          scroll='paper'
+          maxWidth={"xl"}
+          fullWidth
+          onClose={() => setOpenDialog(false)}
+        >
+          <div className="private-layout-alert-dialog">
+            <strong className="private-layout-alert-dialog-title">Avisos</strong>
+            <Table
+              headers={["Status", "Sigla", "Equipamento", "Tag", "Tempo até a expiração"]}
+              rows={alertsData}
+              className="private-layout-alert-dialog-table"
+              deleteAction={() => {}}
+              hiddenToolTip
+            />
+          </div>
+        </Dialog>
     </div>
   );
 }

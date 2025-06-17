@@ -44,6 +44,18 @@
         -ms-user-select: none; /* IE 10 and IE 11 */
         user-select: none; /* Standard syntax */
       }
+
+      .private-layout-header-icons {
+        margin-right: 10px;
+        display: flex;
+        gap: 10px;
+
+        .MuiBadge-badge {
+          background-color: var(--default-red-color);
+          color: var(--off-white-color);
+          padding: 0 2px;
+        }
+      }
     }
 
     .private-layout-header-menu-open {
@@ -124,6 +136,23 @@
     a {
       text-decoration: underline;
     }
+  }
+
+}
+
+.private-layout-alert-dialog {
+  height: 80vh !important;
+  padding: 10px;
+  background-color: var(--off-white-color);
+
+  .private-layout-alert-dialog-title {
+    color: var(--default-blue-color);
+  }
+  
+  .private-layout-alert-dialog-table {
+    margin-top: 15px;
+    height: 85%;
+    width: 100%;
   }
 }
 
