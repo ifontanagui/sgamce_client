@@ -373,7 +373,7 @@ export default function EventsCertificates() {
                 title="Tipo"
                 value={eventType}
                 onChange={(value: string | number) => setEventType(value.toString())}
-                valuesList={[{value: 'Calibracao', description: 'Calibração'},{value: 'Manutencao', description: 'Manutenção'},{value: 'Qualificao', description: 'Qualificação'},{value: 'Verificacao', description: 'Verificação'}]}
+                valuesList={[{value: 'Calibracao', description: 'Calibração'},{value: 'Manutencao', description: 'Manutenção'},{value: 'Qualificacao', description: 'Qualificação'},{value: 'Verificacao', description: 'Verificação'}]}
                 required
                 error={!newlyOpened && !eventType}
                 helperText="É obrigatório informar o tipo do evento"
