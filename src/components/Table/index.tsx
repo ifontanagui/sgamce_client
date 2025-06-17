@@ -23,6 +23,7 @@ interface TableProps {
   className?: string
   rowActions?: React.ReactNode
   rowClick?(row: IRow, index: number): void
+  hiddenToolTip?: boolean
 }
 
 interface RowProps {
@@ -34,9 +35,10 @@ interface RowProps {
   rowActions?: React.ReactNode
   rowClick?(row: IRow, index: number): void
   index?: number
+  hiddenToolTip?: boolean
 }
 
-function Row({ row, withSubList, editAction, deleteAction, emptyTable, rowActions, rowClick, index }: RowProps) {
+function Row({ row, withSubList, editAction, deleteAction, emptyTable, rowActions, rowClick, index, hiddenToolTip }: RowProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -63,9 +65,12 @@ function Row({ row, withSubList, editAction, deleteAction, emptyTable, rowAction
         <>
           {deleteAction && row.active !== undefined &&
           <TableCell className='table-row-sublist-list-header-cell-icon' >
-            <Tooltip title={!!row.active ? 'Desativar' : "Ativar"}>
-              <IconButton onClick={() => deleteAction(row)}><Circle className={!!row.active ? 'active' : 'inactive'} /></IconButton>
-            </Tooltip>
+            {!hiddenToolTip 
+              ? <Tooltip title={!!row.active ? 'Desativar' : "Ativar"}>
+                  <IconButton onClick={() => deleteAction(row)}><Circle className={!!row.active ? 'active' : 'inactive'} /></IconButton>
+                </Tooltip>
+              : <IconButton onClick={() => deleteAction(row)}><Circle className={!!row.active ? 'active' : 'inactive'} /></IconButton>
+            }
           </TableCell>}
           {editAction &&
           <TableCell className='table-row-sublist-list-header-cell-icon' >
@@ -147,7 +152,7 @@ function Row({ row, withSubList, editAction, deleteAction, emptyTable, rowAction
   );
 }
 
-export default function Table({ headers, rows, editAction, deleteAction, className, rowActions, rowClick }: TableProps ) {
+export default function Table({ headers, rows, editAction, deleteAction, className, rowActions, rowClick, hiddenToolTip }: TableProps ) {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [page, setPage] = React.useState(0);
   const haveSubList = rows.some(x => !!x.subList);
@@ -193,6 +198,7 @@ export default function Table({ headers, rows, editAction, deleteAction, classNa
                   rowActions={rowActions}
                   rowClick={rowClick}
                   index={index}
+                  hiddenToolTip={hiddenToolTip}
                 />
               ))
                 : 
