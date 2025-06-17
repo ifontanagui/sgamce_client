@@ -43,13 +43,13 @@ interface FindBuildsRowsReply {
 }
 
 export async function FindRows(): Promise<FindBuildsRowsReply> {
-  const [replyRooms, replyEquipments, replyUsers] = await Promise.all([
+  const [replyRoom, replyEquipments, replyUsers] = await Promise.all([
     BaseGetRowsRequest('/laboratorios'),
     BaseGetRowsRequest('/equipamentos'),
     BaseGetRowsRequest('/usuarios'),
   ])
-
-  if (!replyRooms.success || !replyEquipments.success || !replyUsers.success ) {
+  
+  if (!replyRoom.success || !replyEquipments.success || !replyUsers.success ) {
     return {
       success: false,
       data: []
@@ -58,11 +58,15 @@ export async function FindRows(): Promise<FindBuildsRowsReply> {
   
   let data = [] as LinkAddressData[]  
 
-  if (!replyRooms.data || !Array.isArray(replyRooms.data)) {
+  if (!replyRoom.data) {
     return {
       success: true,
       data
     }
+  }
+
+  const replyRooms = {
+    data: Array.isArray(replyRoom.data) ? replyRoom.data : [replyRoom.data] 
   }
 
   replyRooms.data.forEach(x => {
@@ -140,7 +144,7 @@ export async function FindRows(): Promise<FindBuildsRowsReply> {
     for(const x of data) {
       if (room) continue;
       
-      const r = x.rooms.find(y => e.id_laboratorio && y.id === e.id_laboratorio[0].id) || null
+      const r = x.rooms.find(y => e.id_laboratorio && y.id === e.id_laboratorio.id) || null
       if (r) {
         build = x;
         room = r;
