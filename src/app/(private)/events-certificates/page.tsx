@@ -85,6 +85,7 @@ export default function EventsCertificates() {
 
   const [equipmentId, setEquipmentId] = React.useState(null as EquipmentEventData | null);
   const [eventId, setEventId] = React.useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [certificateId, setCertificateId] = React.useState(0);
   const [equipmentFilter, setEquipmentFilter ] = React.useState("");
   const [assetNumberFilter, setAssetNumberFilter ] = React.useState(null as number | null);
@@ -216,6 +217,7 @@ export default function EventsCertificates() {
     setEventAmendmentDate("");
     setOpenDrawerEvent(false);
     setNewlyOpened(true);
+    setEventId(0)
     setIsEdit(false);
   }
 
@@ -225,7 +227,7 @@ export default function EventsCertificates() {
     if (!certificateNumber || !certificateDate || !certificateIssuingAuthority) return false;
 
     if (isEdit) {
-      const response = await EditCertificate(certificateId, Number.parseInt(certificateNumber), certificateDate, certificateIssuingAuthority, eventId);
+      const response = await EditCertificate(Number.parseInt(certificateNumber), certificateDate, certificateIssuingAuthority, eventId);
       if (response.success) {
         setReload(true);
         handleCloseAddCertificate();
@@ -261,6 +263,7 @@ export default function EventsCertificates() {
     setCertificateNumber("")
     setIsEdit(false);
     setOpenDrawerCertificate(false)
+    setCertificateId(0)
   }
 
   return (
