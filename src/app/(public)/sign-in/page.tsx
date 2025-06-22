@@ -74,7 +74,7 @@ export default function Login() {
           />
           <InputText 
             type="password" 
-            placeholder="Password" 
+            placeholder="Senha" 
             helperText="Informe a senha"
             value={password}
             error={passwordError}

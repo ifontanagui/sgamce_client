@@ -41,7 +41,11 @@ export async function FindBuildAddressRows(): Promise<FindAddressRowsReply> {
   
   let data = replyBuilds.data.map(x => { return { ...x, ativo: !!x.ativo, rooms: [] } })
   
-  if (replyRooms.data && Array.isArray(replyRooms.data)) {    
+  if (replyRooms.data) {
+    if (!Array.isArray(replyRooms.data)) {
+      replyRooms.data = [replyRooms.data]
+    }
+    
     replyRooms.data.forEach(room => {
       const build = data.find(x => x.id === room.id_bloco.id);
       
