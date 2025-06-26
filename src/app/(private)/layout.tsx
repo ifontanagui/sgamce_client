@@ -31,7 +31,7 @@ export default function PrivateLayout({
   const [openUserMenu, setOpenUserMenu] = React.useState(false);
   const [anchorUserMenu, setAnchorUserMenu] = React.useState<null | HTMLElement>(null);
   const [alertsData, setAlertsData] = React.useState([] as IRow[]);
-  const [openDialog, setOpenDialog] = React.useState(false);
+  const [openDialog, setOpenDialog] = React.useState(true);
   
   React.useEffect(() => {
     (async () => {
