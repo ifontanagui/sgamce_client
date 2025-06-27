@@ -14,6 +14,7 @@ export default function TabsSkeleton(props: TabsSkeletonProps) {
       <Skeleton 
         className={index === 0 ? "first" : ""} 
         animation="wave" 
+        key={Math.random()}
         variant="rounded" 
         width={`${tabWidth}%`} 
         height={index === 0 ? 80 : 65} 
