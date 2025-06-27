@@ -5,12 +5,12 @@ import React from "react";
 import MultiTabs from "@/components/MultiTabs"
 import Table, { IRow } from "@/components/Table";
 import { Chip, Dialog, Drawer, IconButton, Tooltip } from "@mui/material";
-import { AddCircleOutline, GroupAdd, AddToQueue } from "@mui/icons-material";
+import { AddCircleOutline, GroupAdd, AddToQueue, EditLocationAltOutlined } from "@mui/icons-material";
 import InputText from "@/components/InputText";
 import Button from "@/components/Button";
 import Combo from "@/components/Combo";
 import Toast, { DispatchToast, DispatchToastProps } from "@/components/Toast";
-import { AddRoomMachine, AddRoomUser, FindRows, LinkAddressData, ParseToBuildIRow, ParseToEquipmentIRow, ParseToRoomIRow, RoomData } from "@/services/links-service";
+import { AddRoomMachine, AddRoomUser, FindRows, LinkAddressData, ParseToBuildIRow, ParseToEquipmentIRow, ParseToRoomIRow, RoomData, TransferEquipment } from "@/services/links-service";
 import { FindUsersRows, UserData } from "@/services/users-service";
 import { EquipmentData, FindEquipmentsRows } from "@/services/equipments-service";
 import TabsSkeleton from "@/components/TabsSkeleton";
@@ -45,11 +45,26 @@ function equipmentRowActions(
   )
 }
 
+function equipRowActions(
+  onClickActionTransfer:  () => void
+) {
+  return (
+    <div className="transfer-equipment-action">
+      <Tooltip title="Transferir equipamento"> 
+        <IconButton onClick={() => onClickActionTransfer()}>
+          <EditLocationAltOutlined className="transfer-equipment-action-icon"/>
+        </IconButton>
+      </Tooltip>
+    </div>
+  )
+}
+
 export default function Rooms() {
   const userIsAdmin = JSON.parse(getCookie('payload')?.toString() || "{}").admin || false;
   
   const [data, setData] = React.useState([] as LinkAddressData[]);
   const [roomsData, setRoomsData] = React.useState([] as RoomData[]);
+  const [roomsDataTransf, setRoomsDataTransf] = React.useState([] as RoomData[]);
   const [usersData, setUsersData] = React.useState([] as UserData[])
   const [equipmentsData, setEquipmentsData] = React.useState([] as EquipmentData[])
   const [buildRows, setBuildRows] = React.useState([] as IRow[]);
@@ -67,8 +82,10 @@ export default function Rooms() {
   const [identifierNumber, setIdentifierNumber] = React.useState(0);
   const [equipmentAmendmentDate, setEquipmentAmendmentDate ] = React.useState("");
   const [equipment, setEquipment] = React.useState("")
+  const [equipmentId, setEquipmentId] = React.useState(0)
   const [openAddUser, setOpenAddUser] = React.useState(false);
   const [openAddUserForm, setOpenAddUserForm] = React.useState(false);
+  const [openTransferDialog, setOpenTransferDialog] = React.useState(false);
   const [toastMessage, setToastMessage] = React.useState({type: "success", message: ""} as DispatchToastProps);
     
   React.useEffect(() => {
@@ -241,6 +258,33 @@ export default function Rooms() {
     // users = users.filter(x => x.data[1] !== row.data[1]);
     setReload(true);
   }
+  
+  const handleTransfer = async () => {
+    setNewlyOpened(false);
+    console.log('identifierNumber: ', identifierNumber);
+    console.log('equipmentId: ', equipmentId);
+
+    if (!assetNumber || !identifierNumber) return false;
+
+    const response = await TransferEquipment(equipmentId, identifierNumber);
+    if (response.success) {
+      setReload(true);
+      handleCloseTransferEquipment()
+
+      setToastMessage({type: "success", message:  "Certificado editado com sucesso!"})
+    }
+    else {
+      setToastMessage({type: "error", message:  response.message || "Erro ao editar o certificado, tente novamente"});
+    }
+
+    return response.success;
+  }
+
+  const handleCloseTransferEquipment = () => {
+    setOpenTransferDialog(false);
+    setAssetNumber(0);
+    setIdentifierNumber(0);
+  }
 
   return (
     <div className="rooms">
@@ -310,8 +354,10 @@ export default function Rooms() {
                   <Table
                     headers={['ID', 'Equipamento', 'Nro. Identificação', 'Nro. Patrimonio', 'Dt. Implantação']}
                     rows={equipmentRows}
+                    rowClick={(row: IRow) => {setEquipmentId(Number.parseInt(row.data[0].toString()));}}
                     className="rooms-table"
                     deleteAction={handleDeleteMachineClick}
+                    rowActions={equipRowActions(() => { setOpenTransferDialog(true)})}
                   />
                 </div>
               </div>
@@ -414,7 +460,54 @@ export default function Rooms() {
                 textContent='Salvar'
               />
             </div>
-          </Drawer>
+          </Drawer> 
+          <Dialog
+            open={openTransferDialog}
+            onClose={handleCloseTransferEquipment}
+            scroll='paper'
+            maxWidth={"xl"}
+            fullWidth
+          >
+            <div className='transfer-dialog'>
+              <strong className="transfer-dialog-title">Transferir Equipamento</strong>
+              <div className='transfer-dialog-body'>
+                <div className='equipments-combo'>
+                  <Combo 
+                    title="Bloco" 
+                    value={assetNumber}
+                    onChange={(value: string | number) => {
+                      setAssetNumber(Number(value.toString()))
+                      setRoomsDataTransf(data.find(x => x.id.toString() === value.toString())?.rooms || [])
+                    }}
+                    valuesList={data.map(x => { return { value: x.id, description: x.nome }})}
+                    emptyValue 
+                    required
+                    error={!newlyOpened && !assetNumber}
+                    helperText="É obrigatório informar o bloco"
+                  />
+                  <Combo 
+                    title="Laboratório/Sala" 
+                    value={identifierNumber}
+                    onChange={(value: string | number) => {  setIdentifierNumber(!value ? 0 : Number(value.toString()))}}
+                    valuesList={roomsDataTransf.map(x => { return { value: x.id, description: `${x.sala} - ${x.nome}` }})}
+                    emptyValue 
+                    required
+                    error={!newlyOpened && !identifierNumber}
+                    helperText="É obrigatório informar o laboratório/sala"
+                  />
+                </div>             
+                <Button 
+                  className="save-button"
+                  onClick={async () => {
+                    const result = await handleTransfer();
+                    if (result)
+                      setOpenTransferDialog(false);
+                  }} 
+                  textContent='Salvar'
+                />
+              </div>
+            </div>
+          </Dialog> 
         </>
       }
     <Toast />

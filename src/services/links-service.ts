@@ -192,6 +192,16 @@ export async function AddRoomMachine(tag: string, numero_patrimonio: string, id_
   })
 }
 
+export async function TransferEquipment(id_equipamento: number, id_laboratorio: number): Promise<BasePostReply> {
+  const { data } = await BaseGetRowsRequest(`/equipamento/${id_equipamento}`);
+
+  return await BasePostRequest("/equipamento/atualizar", {
+    ...data,
+    id: id_equipamento,
+    id_laboratorio
+  })
+}
+
 export async function AddRoomUser(user: UserData, id_laboratorio: number) {
   return BasePostRequest('/usuario/atualizar', { 
     ...user,
