@@ -31,11 +31,12 @@ export default function PrivateLayout({
   const [openUserMenu, setOpenUserMenu] = React.useState(false);
   const [anchorUserMenu, setAnchorUserMenu] = React.useState<null | HTMLElement>(null);
   const [alertsData, setAlertsData] = React.useState([] as IRow[]);
-  const [openDialog, setOpenDialog] = React.useState(true);
+  const [openDialog, setOpenDialog] = React.useState(false);
   
   React.useEffect(() => {
     (async () => {
       const reply = await FindAlertsRows();
+      setOpenDialog(reply.data.length > 0)
       setAlertsData(reply.data?.map(x => { return { data: [ x.Status, x.Sigla, x.Equipamento, x.TAG, x.CertificadoExpiraEm ], active: x.CertificadoExpiraEm > 0 } }) || []);
     })().catch(console.error);
   }, []);
