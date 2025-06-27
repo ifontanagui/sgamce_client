@@ -357,7 +357,14 @@ export default function Rooms() {
                     rowClick={(row: IRow) => {setEquipmentId(Number.parseInt(row.data[0].toString()));}}
                     className="rooms-table"
                     deleteAction={handleDeleteMachineClick}
-                    rowActions={equipRowActions(() => { setOpenTransferDialog(true)})}
+                    rowActions={equipRowActions(() => {
+                      if (!userIsAdmin) {
+                        setToastMessage({type: "error", message: "Somente administradores podem transferir equipamentos"})
+                        return;
+                      }
+
+                      setOpenTransferDialog(true)
+                    })}
                   />
                 </div>
               </div>
