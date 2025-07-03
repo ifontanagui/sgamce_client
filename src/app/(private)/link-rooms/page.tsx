@@ -36,7 +36,7 @@ function equipmentRowActions(
 ) {
   return (
     <div className="add-equipment-action">
-      <Tooltip title="Vincular equipamento"> 
+      <Tooltip title="Vincular Item"> 
         <IconButton onClick={() => onClickActionUser()}>
           <AddToQueue className="add-users-action-icon"/>
         </IconButton>
@@ -50,7 +50,7 @@ function equipRowActions(
 ) {
   return (
     <div className="transfer-equipment-action">
-      <Tooltip title="Transferir equipamento"> 
+      <Tooltip title="Transferir Item"> 
         <IconButton onClick={() => onClickActionTransfer()}>
           <EditLocationAltOutlined className="transfer-equipment-action-icon"/>
         </IconButton>
@@ -200,10 +200,10 @@ export default function Rooms() {
       handleCloseAddEquipment()
       setReload(true);
 
-      setToastMessage({type: "success", message:  "Equipamento vinculado com sucesso"});
+      setToastMessage({type: "success", message:  "Item vinculado com sucesso"});
     }
     else {
-      setToastMessage({type: "error", message:  response.message || "Erro ao vincular o equipamento, tente novamente"});
+      setToastMessage({type: "error", message:  response.message || "Erro ao vincular o item, tente novamente"});
     }
 
     return response.success;
@@ -339,7 +339,7 @@ export default function Rooms() {
                 </div>
               </div>
             },
-            { header: 'Equipamentos', content:
+            { header: 'Items', content:
               <div className="room-tab">
                 <div className="equipments-tab-header">
                   <div className="room-tab-table-header" >
@@ -359,7 +359,7 @@ export default function Rooms() {
                     deleteAction={handleDeleteMachineClick}
                     rowActions={equipRowActions(() => {
                       if (!userIsAdmin) {
-                        setToastMessage({type: "error", message: "Somente administradores podem transferir equipamentos"})
+                        setToastMessage({type: "error", message: "Somente administradores podem transferir itens"})
                         return;
                       }
 
@@ -421,7 +421,7 @@ export default function Rooms() {
             onClose={() => setOpenAddMachineForm(false)}
           >
             <div className='add-machine-drawer'>
-              <strong className='add-machine-drawer-title'>Cadastrar Equipamento</strong>
+              <strong className='add-machine-drawer-title'>Cadastrar Item</strong>
               <InputText
                 type='text'
                 placeholder='Nro. de Identificação'
@@ -451,7 +451,7 @@ export default function Rooms() {
               />
               <div className='equipments-combo'>
                 <Combo 
-                  title="Equipamentos" 
+                  title="Items" 
                   value={equipment}
                   onChange={(value: string | number) => setEquipment(value.toString())}
                   valuesList={equipmentsData.map(x => { return { value: x.id, description: x.equipamento }})}
@@ -476,7 +476,7 @@ export default function Rooms() {
             fullWidth
           >
             <div className='transfer-dialog'>
-              <strong className="transfer-dialog-title">Transferir Equipamento</strong>
+              <strong className="transfer-dialog-title">Transferir Item</strong>
               <div className='transfer-dialog-body'>
                 <div className='equipments-combo'>
                   <Combo 

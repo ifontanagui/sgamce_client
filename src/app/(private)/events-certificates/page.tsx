@@ -299,7 +299,7 @@ export default function EventsCertificates() {
           setExternalTabsController={setCurTab}
           tabs={[
             {
-              header: 'Equipamentos', content: 
+              header: 'Itens', content: 
               <div className="event-tab">
                 <div className="event-tab-header">  
                   <div className="event-tab-header-chip-container">  
